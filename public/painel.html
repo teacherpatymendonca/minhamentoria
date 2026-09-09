@@ -199,10 +199,10 @@ function renderizar(){
         <span class="aluno-nome">${a.nome} ${selo}</span>
         <span class="aluno-contador">${qtd} ${qtd === 1 ? 'sessão' : 'sessões'} ▾</span>
       </div>
-      <div class="aluno-detalhe" id="aluno-${a.id}">
-        <div class="link-box" onclick="event.stopPropagation(); copiar('${link}')" title="Toque para copiar">${link}</div>
+             <div class="link-box" onclick="event.stopPropagation(); copiar('${link}')" title="Toque para copiar">${link}</div>
+        <p class="small">${formatarData(a.data_inicio) ? 'Aluno(a) desde ' + formatarData(a.data_inicio) : 'Data de início não informada'}</p>
         <div class="aluno-acoes">
-          <button class="ghost" onclick="renomearAluno(${a.id}, '${a.nome.replace(/'/g,"")}')">Renomear</button>
+          <button class="ghost" onclick="renomearAluno(${a.id}, '${a.nome.replace(/'/g,"")}', '${a.data_inicio || ''}')">Renomear</button> 
           <button class="ghost danger" onclick="deletarAluno(${a.id}, '${a.nome.replace(/'/g,"")}')">Deletar aluno</button>
         </div>
         <div style="margin-top:12px;">${sessoesHtml}</div>
