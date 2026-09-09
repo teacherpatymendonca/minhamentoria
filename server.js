@@ -59,13 +59,14 @@ const server = http.createServer(async (req, res) => {
   const url = new URL(req.url, `http://${req.headers.host}`);
   const rota = url.pathname;
   try {
-    if (rota === '/api/criar-aluno' && req.method === 'POST') {
-      const { senha, nome } = await lerCorpo(req);
+     if (rota === '/api/criar-aluno' && req.method === 'POST') {
+      const { senha, nome, data_inicio } = await lerCorpo(req);
       if (senha !== SENHA_PAINEL) return responderJSON(res, 403, { erro: 'senha' });
       if (!nome || !nome.trim()) return responderJSON(res, 400, { erro: 'nome' });
       const codigo = gerarCodigo(nome);
-      await db.execute({ sql: 'INSERT INTO alunos (codigo, nome, criado_em) VALUES (?, ?, ?)', args: [codigo, nome.trim(), new Date().toISOString()] });
+      await db.execute({ sql: 'INSERT INTO alunos (codigo, nome, criado_em, data_inicio) VALUES (?, ?, ?, ?)', args: [codigo, nome.trim(), new Date().toISOString(), data_inicio || null] });
       return responderJSON(res, 200, { codigo, nome: nome.trim() });
+    }
     }
     if (rota === '/api/painel' && req.method === 'POST') {
       const { senha } = await lerCorpo(req);
