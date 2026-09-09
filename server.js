@@ -132,12 +132,13 @@ const server = http.createServer(async (req, res) => {
       const sessoes = await db.execute({ sql: 'SELECT id, titulo, criada_em FROM sessoes WHERE aluno_id = ? ORDER BY criada_em DESC', args: [aluno.rows[0].id] });
       return responderJSON(res, 200, { sessoes: sessoes.rows });
     }
-    if (rota === '/api/renomear-aluno' && req.method === 'POST') {
-      const { senha, aluno_id, nome } = await lerCorpo(req);
+      if (rota === '/api/renomear-aluno' && req.method === 'POST') {
+      const { senha, aluno_id, nome, data_inicio } = await lerCorpo(req);
       if (senha !== SENHA_PAINEL) return responderJSON(res, 403, { erro: 'senha' });
       if (!aluno_id || !nome || !nome.trim()) return responderJSON(res, 400, { erro: 'faltando' });
-      await db.execute({ sql: 'UPDATE alunos SET nome = ? WHERE id = ?', args: [nome.trim(), aluno_id] });
+      await db.execute({ sql: 'UPDATE alunos SET nome = ?, data_inicio = ? WHERE id = ?', args: [nome.trim(), data_inicio || null, aluno_id] });
       return responderJSON(res, 200, { ok: true });
+    }
     }
     if (rota === '/api/renomear-sessao' && req.method === 'POST') {
       const { senha, sessao_id, titulo, data_sessao } = await lerCorpo(req);
