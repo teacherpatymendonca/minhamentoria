@@ -287,11 +287,13 @@ async function salvarEdicaoConteudo(){
   await recarregar();
 }
 
-async function renomearAluno(alunoId, nomeAtual){
+async function renomearAluno(alunoId, nomeAtual, dataAtual){
   const novo = prompt('Novo nome do aluno:', nomeAtual);
   if(novo === null) return;
   if(!novo.trim()){ alert('O nome não pode ficar vazio.'); return; }
-  const r = await fetch('/api/renomear-aluno', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ senha: senhaAtual, aluno_id: alunoId, nome: novo }) });
+  const novaData = prompt('Data de início (formato AAAA-MM-DD, deixe como está se não quiser mudar):', dataAtual || '');
+  if(novaData === null) return;
+  const r = await fetch('/api/renomear-aluno', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ senha: senhaAtual, aluno_id: alunoId, nome: novo, data_inicio: novaData }) });
   if(!r.ok){ alert('Erro ao renomear. Tente de novo.'); return; }
   await recarregar();
 }
