@@ -151,6 +151,13 @@ document.getElementById('cabecalho-nome').textContent = NOME_CABECALHO;
 let senhaAtual = '';
 let dadosPainel = { alunos: [], sessoes: [] };
 let sessaoEditandoId = null;
+  
+
+function formatarData(iso){
+  const partes = (iso || '').split('-');
+  if(partes.length !== 3) return null;
+  return `${partes[2]}/${partes[1]}/${partes[0]}`;
+}
 
 async function entrar(){
   const senha = document.getElementById('senha').value;
