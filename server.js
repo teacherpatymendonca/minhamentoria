@@ -28,6 +28,7 @@ if (!SENHA_PAINEL) {
 async function prepararBanco() {
   await db.execute(`CREATE TABLE IF NOT EXISTS alunos (id INTEGER PRIMARY KEY AUTOINCREMENT, codigo TEXT UNIQUE NOT NULL, nome TEXT NOT NULL, criado_em TEXT NOT NULL)`);
   await db.execute(`CREATE TABLE IF NOT EXISTS sessoes (id INTEGER PRIMARY KEY AUTOINCREMENT, aluno_id INTEGER NOT NULL, titulo TEXT NOT NULL, conteudo_html TEXT NOT NULL, data_sessao TEXT, criada_em TEXT NOT NULL, FOREIGN KEY (aluno_id) REFERENCES alunos(id))`);
+    try { await db.execute('ALTER TABLE alunos ADD COLUMN data_inicio TEXT'); } catch (e) {}
   try { await db.execute('ALTER TABLE sessoes ADD COLUMN data_sessao TEXT'); } catch (e) {}
   try { await db.execute('ALTER TABLE sessoes ADD COLUMN finalizada_em TEXT'); } catch (e) {}
   try { await db.execute('ALTER TABLE sessoes ADD COLUMN vista_em TEXT'); } catch (e) {}
