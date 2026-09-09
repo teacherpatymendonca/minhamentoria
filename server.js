@@ -29,7 +29,7 @@ async function prepararBanco() {
   await db.execute(`CREATE TABLE IF NOT EXISTS alunos (id INTEGER PRIMARY KEY AUTOINCREMENT, codigo TEXT UNIQUE NOT NULL, nome TEXT NOT NULL, criado_em TEXT NOT NULL)`);
   await db.execute(`CREATE TABLE IF NOT EXISTS sessoes (id INTEGER PRIMARY KEY AUTOINCREMENT, aluno_id INTEGER NOT NULL, titulo TEXT NOT NULL, conteudo_html TEXT NOT NULL, data_sessao TEXT, criada_em TEXT NOT NULL, FOREIGN KEY (aluno_id) REFERENCES alunos(id))`);
      try { await db.execute('ALTER TABLE alunos ADD COLUMN data_inicio TEXT'); } catch (e) {}
-  try { await db.execute('ALTER TABLE sessoes ADD COLUMN data_sessao TEXT'); } catch (e) {}
+ 
   try { await db.execute('ALTER TABLE sessoes ADD COLUMN data_sessao TEXT'); } catch (e) {}
   try { await db.execute('ALTER TABLE sessoes ADD COLUMN finalizada_em TEXT'); } catch (e) {}
   try { await db.execute('ALTER TABLE sessoes ADD COLUMN vista_em TEXT'); } catch (e) {}
@@ -67,7 +67,7 @@ const server = http.createServer(async (req, res) => {
       await db.execute({ sql: 'INSERT INTO alunos (codigo, nome, criado_em, data_inicio) VALUES (?, ?, ?, ?)', args: [codigo, nome.trim(), new Date().toISOString(), data_inicio || null] });
       return responderJSON(res, 200, { codigo, nome: nome.trim() });
     }
-    }
+    
     if (rota === '/api/painel' && req.method === 'POST') {
       const { senha } = await lerCorpo(req);
       if (senha !== SENHA_PAINEL) return responderJSON(res, 403, { erro: 'senha' });
@@ -107,7 +107,8 @@ const server = http.createServer(async (req, res) => {
       const mapaRespostas = {};
       respostas.rows.forEach((row) => { mapaRespostas[row.campo_id] = row.valor; });
            return responderJSON(res, 200, { nome: aluno.rows[0].nome, data_inicio: aluno.rows[0].data_inicio, sessao: { id: s.id, titulo: s.titulo, conteudo_html: s.conteudo_html, data_sessao: s.data_sessao, finalizada_em: s.finalizada_em }, respostas: mapaRespostas });
-    if (rota === '/api/salvar' && req.method === 'POST') {
+    }
+      if (rota === '/api/salvar' && req.method === 'POST') {
       const { codigo, sessao_id, campo_id, valor } = await lerCorpo(req);
       if (!codigo || !sessao_id || !campo_id) return responderJSON(res, 400, { erro: 'faltando' });
       const check = await db.execute({ sql: `SELECT s.id FROM sessoes s JOIN alunos a ON a.id = s.aluno_id WHERE s.id = ? AND a.codigo = ?`, args: [sessao_id, codigo] });
@@ -137,7 +138,6 @@ const server = http.createServer(async (req, res) => {
       if (!aluno_id || !nome || !nome.trim()) return responderJSON(res, 400, { erro: 'faltando' });
       await db.execute({ sql: 'UPDATE alunos SET nome = ?, data_inicio = ? WHERE id = ?', args: [nome.trim(), data_inicio || null, aluno_id] });
       return responderJSON(res, 200, { ok: true });
-    }
     }
     if (rota === '/api/renomear-sessao' && req.method === 'POST') {
       const { senha, sessao_id, titulo, data_sessao } = await lerCorpo(req);
