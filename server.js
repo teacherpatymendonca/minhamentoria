@@ -106,8 +106,7 @@ const server = http.createServer(async (req, res) => {
       const respostas = await db.execute({ sql: 'SELECT campo_id, valor FROM respostas WHERE sessao_id = ?', args: [s.id] });
       const mapaRespostas = {};
       respostas.rows.forEach((row) => { mapaRespostas[row.campo_id] = row.valor; });
-      return responderJSON(res, 200, { nome: aluno.rows[0].nome, sessao: { id: s.id, titulo: s.titulo, conteudo_html: s.conteudo_html, data_sessao: s.data_sessao, finalizada_em: s.finalizada_em }, respostas: mapaRespostas });
-    }
+           return responderJSON(res, 200, { nome: aluno.rows[0].nome, data_inicio: aluno.rows[0].data_inicio, sessao: { id: s.id, titulo: s.titulo, conteudo_html: s.conteudo_html, data_sessao: s.data_sessao, finalizada_em: s.finalizada_em }, respostas: mapaRespostas });
     if (rota === '/api/salvar' && req.method === 'POST') {
       const { codigo, sessao_id, campo_id, valor } = await lerCorpo(req);
       if (!codigo || !sessao_id || !campo_id) return responderJSON(res, 400, { erro: 'faltando' });
