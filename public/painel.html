@@ -218,12 +218,14 @@ function toggleAluno(id){
 
 async function criarAluno(){
   const nome = document.getElementById('novo-nome').value;
-  const r = await fetch('/api/criar-aluno', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ senha: senhaAtual, nome }) });
+  const data_inicio = document.getElementById('novo-data-inicio').value;
+  const r = await fetch('/api/criar-aluno', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ senha: senhaAtual, nome, data_inicio }) });
   const st = document.getElementById('aluno-status');
   if(!r.ok){ st.innerText = 'Erro ao criar. Confira o nome.'; return; }
   const d = await r.json();
   st.innerText = `Aluno "${d.nome}" criado.`;
   document.getElementById('novo-nome').value = '';
+  document.getElementById('novo-data-inicio').value = '';
   await recarregar();
 }
 
