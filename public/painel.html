@@ -57,6 +57,8 @@
   button.ghost:hover{background:var(--ink-amber); color:#fff;}
   button.ghost.danger{border-color:var(--danger); color:var(--danger);}
   button.ghost.danger:hover{background:var(--danger); color:#fff;}
+  button.danger{background:var(--danger); color:#fff;}
+  button.danger:hover{background:#8f1a1d;}
   .hidden{display:none;}
   .aluno-item{border:1px solid var(--line); border-radius:12px; padding:14px 16px; margin:10px 0; background:var(--amber-2);}
   .sessao-item{border:1px solid var(--line); border-radius:12px; padding:14px 16px; margin:10px 0; background:var(--white);}
@@ -77,6 +79,15 @@
   .resposta-campo{font-family:var(--font-label); font-weight:600; font-size:11px; color:var(--ink-amber); text-transform:uppercase; letter-spacing:0.05em;}
   .divisor{border:none; border-top:1px dashed var(--line); margin:22px 0;}
   .small{font-size:12.5px; color:#80868d;}
+  @keyframes modal-entra{ from{opacity:0; transform:scale(.97) translateY(6px);} to{opacity:1; transform:scale(1) translateY(0);} }
+  .modal-overlay{position:fixed; inset:0; background:rgba(43,36,34,0.6); display:flex; align-items:center; justify-content:center; padding:20px; z-index:300;}
+  .modal-overlay.hidden{display:none;}
+  .modal-caixa{background:var(--amber-3); border-radius:16px; padding:28px 30px; max-width:420px; width:100%; box-shadow:0 1px 3px rgba(43,36,34,0.08), 0 20px 45px -22px rgba(103,0,16,0.4); animation:modal-entra .2s ease;}
+  .modal-mensagem{margin:0; font-size:15px; line-height:1.55; white-space:pre-line;}
+  .modal-campos label{display:block; font-weight:700; font-size:13px; margin:14px 0 6px 0;}
+  .modal-acoes{display:flex; gap:8px; justify-content:flex-end; margin-top:22px;}
+  .modal-acoes button{margin-top:0;}
+  @media (prefers-reduced-motion: reduce){ .modal-caixa{animation:none;} }
 </style>
 </head>
 <body>
@@ -185,6 +196,14 @@
   </div>
 </div>
 
+<div class="modal-overlay hidden" id="modal-overlay">
+  <div class="modal-caixa">
+    <p class="modal-mensagem" id="modal-mensagem"></p>
+    <div class="modal-campos" id="modal-campos"></div>
+    <div class="modal-acoes" id="modal-acoes"></div>
+  </div>
+</div>
+
 <script>
 // Nome do app e seu nome de professor(a) — troque aqui pra personalizar a logo do topo.
 const NOME_APP = 'The Fluent Self';
@@ -201,6 +220,85 @@ function formatarData(iso){
   const partes = (iso || '').split('-');
   if(partes.length !== 3) return null;
   return `${partes[2]}/${partes[1]}/${partes[0]}`;
+}
+
+// ---- Modal customizado: substitui alert()/confirm()/prompt() nativos do navegador. ----
+// mostrarModal() é a função central; modalAlerta/modalConfirmar/modalFormulario são atalhos
+// prontos pros três usos que o painel precisa. Todas retornam uma Promise, então se usa com
+// await, igual as funções nativas que elas substituem.
+function mostrarModal({ mensagem, campos, confirmarTexto, cancelarTexto, perigo }){
+  return new Promise((resolve) => {
+    const overlay = document.getElementById('modal-overlay');
+    const msgEl = document.getElementById('modal-mensagem');
+    const camposEl = document.getElementById('modal-campos');
+    const acoesEl = document.getElementById('modal-acoes');
+
+    msgEl.textContent = mensagem || '';
+    msgEl.style.display = mensagem ? '' : 'none';
+
+    camposEl.innerHTML = '';
+    const inputs = [];
+    (campos || []).forEach((c) => {
+      const label = document.createElement('label');
+      label.textContent = c.label;
+      const input = document.createElement('input');
+      input.type = c.tipo || 'text';
+      input.value = c.valor || '';
+      camposEl.appendChild(label);
+      camposEl.appendChild(input);
+      inputs.push({ chave: c.chave, input });
+    });
+
+    function fechar(valor){
+      overlay.classList.add('hidden');
+      document.removeEventListener('keydown', aoTeclar);
+      resolve(valor);
+    }
+    function confirmar(){
+      if(campos && campos.length){
+        const valores = {};
+        inputs.forEach(({ chave, input }) => { valores[chave] = input.value; });
+        fechar(valores);
+      } else {
+        fechar(true);
+      }
+    }
+    function cancelar(){ fechar(campos && campos.length ? null : false); }
+    function aoTeclar(e){
+      if(e.key === 'Escape') cancelar();
+      if(e.key === 'Enter' && campos && campos.length) confirmar();
+    }
+
+    acoesEl.innerHTML = '';
+    if(cancelarTexto !== null){
+      const btnCancelar = document.createElement('button');
+      btnCancelar.type = 'button';
+      btnCancelar.className = 'ghost';
+      btnCancelar.textContent = cancelarTexto || 'Cancelar';
+      btnCancelar.onclick = cancelar;
+      acoesEl.appendChild(btnCancelar);
+    }
+    const btnConfirmar = document.createElement('button');
+    btnConfirmar.type = 'button';
+    if(perigo) btnConfirmar.className = 'danger';
+    btnConfirmar.textContent = confirmarTexto || 'OK';
+    btnConfirmar.onclick = confirmar;
+    acoesEl.appendChild(btnConfirmar);
+
+    overlay.classList.remove('hidden');
+    document.addEventListener('keydown', aoTeclar);
+    (inputs[0] ? inputs[0].input : btnConfirmar).focus();
+  });
+}
+
+function modalAlerta(mensagem){
+  return mostrarModal({ mensagem, cancelarTexto: null, confirmarTexto: 'OK' });
+}
+function modalConfirmar(mensagem, { perigo = false, confirmarTexto = 'Confirmar' } = {}){
+  return mostrarModal({ mensagem, confirmarTexto, cancelarTexto: 'Cancelar', perigo });
+}
+function modalFormulario(campos, { mensagem, confirmarTexto = 'Salvar' } = {}){
+  return mostrarModal({ mensagem, campos, confirmarTexto, cancelarTexto: 'Cancelar' });
 }
 
 async function entrar(){
@@ -377,7 +475,7 @@ function baixarRespostas(){
 
 async function editarConteudo(sessaoId){
   const r = await fetch('/api/conteudo-sessao', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ senha: senhaAtual, sessao_id: sessaoId }) });
-  if(!r.ok){ alert('Erro ao buscar o conteúdo.'); return; }
+  if(!r.ok){ await modalAlerta('Erro ao buscar o conteúdo.'); return; }
   const d = await r.json();
   sessaoEditandoId = sessaoId;
   document.getElementById('editar-conteudo').value = d.conteudo_html;
@@ -422,43 +520,45 @@ async function confirmarDuplicacao(){
 }
 
 async function renomearAluno(alunoId, nomeAtual, dataAtual){
-  const novo = prompt('Novo nome do aluno:', nomeAtual);
-  if(novo === null) return;
-  if(!novo.trim()){ alert('O nome não pode ficar vazio.'); return; }
-  const novaData = prompt('Data de início (formato AAAA-MM-DD, deixe como está se não quiser mudar):', dataAtual || '');
-  if(novaData === null) return;
-  const r = await fetch('/api/renomear-aluno', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ senha: senhaAtual, aluno_id: alunoId, nome: novo, data_inicio: novaData }) });
-  if(!r.ok){ alert('Erro ao renomear. Tente de novo.'); return; }
+  const valores = await modalFormulario([
+    { chave: 'nome', label: 'Novo nome do aluno', valor: nomeAtual },
+    { chave: 'data', label: 'Data de início (opcional)', valor: dataAtual || '', tipo: 'date' },
+  ], { confirmarTexto: 'Renomear' });
+  if(!valores) return;
+  if(!valores.nome.trim()){ await modalAlerta('O nome não pode ficar vazio.'); return; }
+  const r = await fetch('/api/renomear-aluno', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ senha: senhaAtual, aluno_id: alunoId, nome: valores.nome, data_inicio: valores.data }) });
+  if(!r.ok){ await modalAlerta('Erro ao renomear. Tente de novo.'); return; }
   await recarregar();
 }
 
 async function renomearSessao(sessaoId, tituloAtual, dataAtual){
-  const novoTitulo = prompt('Novo título da sessão:', tituloAtual);
-  if(novoTitulo === null) return;
-  if(!novoTitulo.trim()){ alert('O título não pode ficar vazio.'); return; }
-  const novaData = prompt('Data da aula (formato AAAA-MM-DD, deixe como está se não quiser mudar):', dataAtual || '');
-  if(novaData === null) return;
-  const r = await fetch('/api/renomear-sessao', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ senha: senhaAtual, sessao_id: sessaoId, titulo: novoTitulo, data_sessao: novaData }) });
-  if(!r.ok){ alert('Erro ao renomear. Tente de novo.'); return; }
+  const valores = await modalFormulario([
+    { chave: 'titulo', label: 'Novo título da sessão', valor: tituloAtual },
+    { chave: 'data', label: 'Data da aula (opcional)', valor: dataAtual || '', tipo: 'date' },
+  ], { confirmarTexto: 'Renomear' });
+  if(!valores) return;
+  if(!valores.titulo.trim()){ await modalAlerta('O título não pode ficar vazio.'); return; }
+  const r = await fetch('/api/renomear-sessao', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ senha: senhaAtual, sessao_id: sessaoId, titulo: valores.titulo, data_sessao: valores.data }) });
+  if(!r.ok){ await modalAlerta('Erro ao renomear. Tente de novo.'); return; }
   await recarregar();
 }
 
 async function deletarSessao(sessaoId, titulo){
-  const ok = confirm(`Deletar a sessão "${titulo}"?\n\nIsso apaga a sessão e todas as respostas do aluno nela. Não dá pra desfazer.`);
+  const ok = await modalConfirmar(`Deletar a sessão "${titulo}"?\n\nIsso apaga a sessão e todas as respostas do aluno nela. Não dá pra desfazer.`, { perigo: true, confirmarTexto: 'Deletar' });
   if(!ok) return;
   const r = await fetch('/api/deletar-sessao', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ senha: senhaAtual, sessao_id: sessaoId }) });
-  if(!r.ok){ alert('Erro ao deletar. Tente de novo.'); return; }
+  if(!r.ok){ await modalAlerta('Erro ao deletar. Tente de novo.'); return; }
   document.getElementById('respostas-card').classList.add('hidden');
   await recarregar();
 }
 
 async function deletarAluno(alunoId, nome){
-  const ok = confirm(`Deletar o aluno "${nome}"?\n\nIsso apaga o aluno, TODAS as sessões dele e TODAS as respostas. O link dele para de funcionar. Não dá pra desfazer.`);
+  const ok = await modalConfirmar(`Deletar o aluno "${nome}"?\n\nIsso apaga o aluno, TODAS as sessões dele e TODAS as respostas. O link dele para de funcionar. Não dá pra desfazer.`, { perigo: true, confirmarTexto: 'Deletar' });
   if(!ok) return;
-  const ok2 = confirm(`Tem certeza mesmo? "${nome}" e tudo dele serão apagados para sempre.`);
+  const ok2 = await modalConfirmar(`Tem certeza mesmo? "${nome}" e tudo dele serão apagados para sempre.`, { perigo: true, confirmarTexto: 'Sim, apagar tudo' });
   if(!ok2) return;
   const r = await fetch('/api/deletar-aluno', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ senha: senhaAtual, aluno_id: alunoId }) });
-  if(!r.ok){ alert('Erro ao deletar. Tente de novo.'); return; }
+  if(!r.ok){ await modalAlerta('Erro ao deletar. Tente de novo.'); return; }
   document.getElementById('respostas-card').classList.add('hidden');
   await recarregar();
 }
