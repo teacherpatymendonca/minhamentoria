@@ -44,9 +44,9 @@
   .save-indicator.show{opacity:1;}
   .road{position:relative; height:52px; max-width:900px; margin:0 auto;}
   .road svg{width:100%; height:100%; display:block;}
-  .card{max-width:900px; background:var(--amber-3); border-radius:16px; padding:38px 42px; margin:0 auto; box-shadow:0 24px 60px -30px rgba(0,0,0,0.55);}
+  .card{max-width:900px; background:var(--amber-3); border-radius:20px; padding:38px 42px; margin:0 auto; box-shadow:0 24px 60px -30px rgba(0,0,0,0.55);}
   /* Blindagem: mesmo sem a div .card, a seção já nasce com o fundo claro. Evita texto invisível se o conteúdo esquecer o wrapper. */
-  section.block{max-width:900px; margin:0 auto; background:var(--amber-3); border-radius:16px; padding:38px 42px; box-shadow:0 24px 60px -30px rgba(0,0,0,0.55); border-top:4px solid var(--amber-bold); position:relative;}
+  section.block{max-width:900px; margin:0 auto; background:var(--amber-3); border-radius:20px; padding:38px 42px; box-shadow:0 24px 60px -30px rgba(0,0,0,0.55); border-top:4px solid var(--amber-bold); position:relative;}
   section.block .card{box-shadow:none; padding:0; margin:0; border-radius:0;}
 
   /* respiro entre blocos consecutivos da lição, pra cada um ler como uma ilha separada */
@@ -266,6 +266,16 @@ async function iniciar(){
 }
 
 function render(d){
+  const app = document.getElementById('app');
+  let dataHtml = '';
+  if(d.sessao.data_sessao){
+    const partes = d.sessao.data_sessao.split('-');
+    if(partes.length === 3){
+      const dt = new Date(Number(partes[0]), Number(partes[1]) - 1, Number(partes[2]));
+      const formatada = dt.toLocaleDateString('pt-BR', { day:'numeric', month:'long', year:'numeric' });
+      dataHtml = `<div class="header-data">${formatada}</div>`;
+    }
+  }
   let alunoDesdeHtml = '';
   if(d.data_inicio){
     const partesDesde = d.data_inicio.split('-');
@@ -280,14 +290,6 @@ function render(d){
       <h1>${d.sessao.titulo}</h1>
       ${dataHtml}
       ${alunoDesdeHtml}
-    </header>
-    }
-  }
-  app.innerHTML = `
-    <header>
-      <div class="eyebrow">${TEXTOS.eyebrow}</div>
-      <h1>${d.sessao.titulo}</h1>
-      ${dataHtml}
     </header>
     <div class="acervo" id="acervo"></div>
     <div class="road"><svg viewBox="0 0 760 52" preserveAspectRatio="none"><line x1="0" y1="26" x2="760" y2="26" stroke="#c7ced6" stroke-width="2" stroke-dasharray="14 10" opacity="0.6"/></svg></div>
@@ -416,7 +418,7 @@ function restaurarEstadoDnd(container, valorSalvo){
       if(target && piece){ target.appendChild(piece); target.classList.add('filled'); }
     });
   }
-}f
+}
 
 function iniciarArrasteDnd(e){
   const piece = e.currentTarget;
