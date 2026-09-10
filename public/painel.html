@@ -7,7 +7,7 @@
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%23cb4c46'/%3E%3Crect x='20' y='14' width='9' height='36' rx='2' fill='%23fff'/%3E%3Crect x='20' y='14' width='28' height='9' rx='2' fill='%23fff'/%3E%3Crect x='20' y='30' width='22' height='9' rx='2' fill='%23fff'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600..900&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,600..900;1,9..144,600..900&display=swap" rel="stylesheet">
 <style>
   /* ---- Paleta e tipografia: troque só aqui pra personalizar o visual ----
      Cor: os nomes das variáveis (--amber-bold etc.) ficaram assim por
@@ -37,6 +37,11 @@
   }
   header{padding:48px 24px 32px 24px; text-align:center; color:var(--white);}
   .eyebrow{font-family:var(--font-label); font-weight:700; font-size:12.5px; letter-spacing:0.14em; text-transform:uppercase; color:var(--amber-bold); margin-bottom:14px;}
+  .logo{display:inline-flex; align-items:center; gap:14px; margin-bottom:20px;}
+  .logo-mark{width:44px; height:44px; flex:0 0 auto;}
+  .logo-text{text-align:center;}
+  .logo-nome{font-family:var(--font-display); font-style:italic; font-weight:600; font-size:30px; color:var(--amber-bold); line-height:1.1;}
+  .logo-professor{font-family:var(--font-label); font-weight:600; font-size:10px; letter-spacing:0.1em; text-transform:uppercase; color:var(--muted); margin-top:4px;}
   h1{font-family:var(--font-display); font-weight:900; font-size:clamp(28px,4vw,40px); margin:0;}
   .wrap{max-width:820px; margin:0 auto; padding:0 24px;}
   .card{background:var(--amber-3); border-radius:16px; padding:32px 36px; margin-bottom:24px; box-shadow:0 1px 3px rgba(43,36,34,0.08), 0 20px 45px -22px rgba(103,0,16,0.28);}
@@ -76,7 +81,18 @@
 <body>
 
 <header>
-  <div class="eyebrow" id="cabecalho-nome">Nome do professor · Nome do app</div>
+  <div class="logo">
+    <svg class="logo-mark" viewBox="0 0 64 64" role="img" aria-label="Logo">
+      <rect width="64" height="64" rx="16" fill="#cb4c46"/>
+      <rect x="20" y="14" width="9" height="36" rx="2" fill="#fff"/>
+      <rect x="20" y="14" width="28" height="9" rx="2" fill="#fff"/>
+      <rect x="20" y="30" width="22" height="9" rx="2" fill="#fff"/>
+    </svg>
+    <div class="logo-text">
+      <div class="logo-nome" id="logo-nome">Nome do app</div>
+      <div class="logo-professor" id="logo-professor">Nome do professor</div>
+    </div>
+  </div>
   <h1>Painel de acompanhamento</h1>
 </header>
 
@@ -148,9 +164,11 @@
 </div>
 
 <script>
-// Texto do cabeçalho do painel — troque aqui pelo seu nome e o nome do seu app.
-const NOME_CABECALHO = 'Teacher Paty Mendonça · The Fluent Self';
-document.getElementById('cabecalho-nome').textContent = NOME_CABECALHO;
+// Nome do app e seu nome de professor(a) — troque aqui pra personalizar a logo do topo.
+const NOME_APP = 'The Fluent Self';
+const NOME_PROFESSOR = 'Teacher Paty Mendonça';
+document.getElementById('logo-nome').textContent = NOME_APP;
+document.getElementById('logo-professor').textContent = NOME_PROFESSOR;
 
 let senhaAtual = '';
 let dadosPainel = { alunos: [], sessoes: [] };
