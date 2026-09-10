@@ -382,15 +382,6 @@ async function iniciar(){
 
 function render(d){
   const app = document.getElementById('app');
-  let dataHtml = '';
-  if(d.sessao.data_sessao){
-    const partes = d.sessao.data_sessao.split('-');
-    if(partes.length === 3){
-      const dt = new Date(Number(partes[0]), Number(partes[1]) - 1, Number(partes[2]));
-      const formatada = dt.toLocaleDateString('en-US', { month:'long', day:'numeric', year:'numeric' });
-      dataHtml = `<div class="header-data">${formatada}</div>`;
-    }
-  }
   let alunoDesdeHtml = '';
   if(d.data_inicio){
     const partesDesde = d.data_inicio.split('-');
@@ -414,7 +405,6 @@ function render(d){
         </div>
       </div>
       <h1>${d.sessao.titulo}</h1>
-      ${dataHtml}
       ${alunoDesdeHtml}
     </header>
     <div class="progresso" id="progresso"></div>
