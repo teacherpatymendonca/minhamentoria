@@ -212,6 +212,8 @@ try{ var temaSalvo = sessionStorage.getItem('aluno-tema'); if(temaSalvo) documen
   .progresso-texto{font-family:var(--font-label); font-weight:700; font-size:11px; letter-spacing:0.1em; text-transform:uppercase; color:var(--amber-bold); text-align:center; margin-bottom:8px;}
   .progresso-barra{background:rgba(240,214,209,0.18); border-radius:20px; height:8px; overflow:hidden;}
   .progresso-preenchido{background:var(--amber-bold); height:100%; border-radius:20px; transition:width .4s ease;}
+  .boas-vindas{max-width:900px; margin:0 auto 28px auto; padding:0 24px;}
+  .boas-vindas-card{background:var(--amber-1); border:1px solid var(--amber-bold); border-radius:16px; padding:20px 26px; text-align:center; font-family:var(--font-display); font-style:italic; font-weight:600; font-size:17px; color:var(--ink-amber); box-shadow:0 1px 3px rgba(43,36,34,0.08), 0 20px 45px -22px rgba(103,0,16,0.28);}
   .acervo{max-width:900px; margin:0 auto 8px auto; padding:0 24px;}
   .acervo-toggle{font-family:var(--font-label); font-weight:700; font-size:11.5px; letter-spacing:0.08em; text-transform:uppercase; color:var(--amber-bold); background:none; border:1px solid rgba(91,143,201,0.35); border-radius:20px; padding:7px 16px; cursor:pointer;}
   .acervo-toggle:hover{border-color:var(--amber-bold);}
@@ -271,6 +273,7 @@ const TEXTOS = {
   fechamentoKicker: 'Before you go',
     fechamentoPergunta: 'How was this session? What insights did you get?',
   alunoDesde: (data) => `With us since ${data}`,
+  boasVindas: (nome) => `Welcome, ${nome}! This is your personal learning space.`,
 };
 document.title = TEXTOS.tituloPagina;
 document.getElementById('loading').textContent = TEXTOS.carregando;
@@ -366,6 +369,7 @@ function render(d){
     </header>
     <div class="progresso" id="progresso"></div>
     <div class="acervo" id="acervo"></div>
+    <div class="boas-vindas" id="boas-vindas"></div>
     <div id="conteudo-sessao">${d.sessao.conteudo_html}</div>
     <div class="finalizar-area" id="finalizar-area"></div>
   `;
@@ -385,6 +389,20 @@ function render(d){
   adicionarPerguntaFechamento(d);
   carregarAcervo(d.sessao.id);
   renderFinalizar(d.sessao.finalizada_em);
+  mostrarBoasVindas(d.nome);
+}
+
+// Mensagem de boas-vindas: aparece só na primeira vez que o aluno abre o link dele
+// (guardado no localStorage do navegador dele, não no banco de dados).
+function mostrarBoasVindas(nome){
+  const el = document.getElementById('boas-vindas');
+  if(!el) return;
+  const chave = 'boas-vindas-' + codigo;
+  let jaVisitou = false;
+  try{ jaVisitou = localStorage.getItem(chave) === '1'; }catch(e){}
+  if(jaVisitou) return;
+  el.innerHTML = `<div class="boas-vindas-card">${TEXTOS.boasVindas(nome || '')}</div>`;
+  try{ localStorage.setItem(chave, '1'); }catch(e){}
 }
 
 function renderFinalizar(finalizadaEm){
