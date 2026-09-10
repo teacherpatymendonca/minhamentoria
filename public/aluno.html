@@ -59,7 +59,6 @@ try{ var temaSalvo = sessionStorage.getItem('aluno-tema'); if(temaSalvo) documen
   [data-theme="light"] body{background-image:none;}
   .wrap{max-width:900px; margin:0 auto; padding:0 24px;}
   header{padding:56px 24px 40px 24px; text-align:center; color:var(--cor-cabecalho);}
-  .eyebrow{font-family:var(--font-label); font-weight:700; font-size:12.5px; letter-spacing:0.14em; text-transform:uppercase; color:var(--amber-bold); margin-bottom:16px;}
   .logo{display:inline-flex; align-items:center; gap:14px; margin-bottom:22px;}
   .logo-mark{width:44px; height:44px; flex:0 0 auto;}
   .logo-text{text-align:center;}
@@ -302,7 +301,6 @@ const TEXTOS = {
   carregando: 'Carregando...',
   linkInvalido: 'Link inválido. Peça o link certo para a sua professora.',
   semMaterial: (nome) => `Oi, ${nome || ''}! Ainda não há material aqui.`,
-  eyebrow: '🌱 Time to expand',
   salvando: 'salvando...',
   salvo: 'salvo',
   erroSalvar: 'erro ao salvar',
@@ -323,7 +321,7 @@ const TEXTOS = {
   flashReflectPergunta: 'What do you want to remember from these? Why?',
   fechamentoKicker: '👋 Before you go',
     fechamentoPergunta: 'How was this session? What insights did you get?',
-  alunoDesde: (data) => `With us since ${data}`,
+  alunoDesde: (data) => `Since ${data}`,
   boasVindas: (nome) => `👋 Welcome, ${nome}! This is your personal learning space.`,
   lembretePendentes: (qtd) => qtd === 1 ? '⏳ You have 1 unfinished session.' : `⏳ You have ${qtd} unfinished sessions.`,
   lembreteLink: 'See your sessions',
@@ -389,7 +387,7 @@ function render(d){
     const partes = d.sessao.data_sessao.split('-');
     if(partes.length === 3){
       const dt = new Date(Number(partes[0]), Number(partes[1]) - 1, Number(partes[2]));
-      const formatada = dt.toLocaleDateString('pt-BR', { day:'numeric', month:'long', year:'numeric' });
+      const formatada = dt.toLocaleDateString('en-US', { month:'long', day:'numeric', year:'numeric' });
       dataHtml = `<div class="header-data">${formatada}</div>`;
     }
   }
@@ -398,7 +396,7 @@ function render(d){
     const partesDesde = d.data_inicio.split('-');
     if(partesDesde.length === 3){
       const dtDesde = new Date(Number(partesDesde[0]), Number(partesDesde[1]) - 1, Number(partesDesde[2]));
-      alunoDesdeHtml = `<div class="header-data">${TEXTOS.alunoDesde(dtDesde.toLocaleDateString('pt-BR', { day:'numeric', month:'long', year:'numeric' }))}</div>`;
+      alunoDesdeHtml = `<div class="header-data">${TEXTOS.alunoDesde(dtDesde.toLocaleDateString('en-US', { month:'long', day:'numeric', year:'numeric' }))}</div>`;
     }
   }
   app.innerHTML = `
@@ -415,7 +413,6 @@ function render(d){
           <div class="logo-professor">${NOME_PROFESSOR}</div>
         </div>
       </div>
-      <div class="eyebrow">${TEXTOS.eyebrow}</div>
       <h1>${d.sessao.titulo}</h1>
       ${dataHtml}
       ${alunoDesdeHtml}
