@@ -170,6 +170,18 @@
       <div class="status" id="editar-status"></div>
     </div>
 
+    <div class="card hidden" id="duplicar-card">
+      <h2>Duplicar sessão</h2>
+      <p class="tagline">Cria uma cópia com o mesmo conteúdo para outro aluno, sem as respostas do aluno original.</p>
+      <label>Aluno de destino</label>
+      <select id="duplicar-aluno"></select>
+      <label>Título da nova sessão</label>
+      <input type="text" id="duplicar-titulo">
+      <button onclick="confirmarDuplicacao()">Duplicar sessão</button>
+      <button class="ghost" onclick="document.getElementById('duplicar-card').classList.add('hidden')">Cancelar</button>
+      <div class="status" id="duplicar-status"></div>
+    </div>
+
   </div>
 </div>
 
@@ -248,6 +260,7 @@ function renderizar(){
             <button class="ghost" onclick="verRespostas(${s.id}, '${s.titulo.replace(/'/g,"")}', '${a.nome.replace(/'/g,"")}', '${s.data_sessao || ''}')">Ver respostas</button>
             <button class="ghost" onclick="renomearSessao(${s.id}, '${s.titulo.replace(/'/g,"")}', '${s.data_sessao || ''}')">Renomear</button>
             <button class="ghost" onclick="editarConteudo(${s.id})">Editar conteúdo</button>
+            <button class="ghost" onclick="abrirDuplicar(${s.id}, '${s.titulo.replace(/'/g,"")}')">Duplicar</button>
             <button class="ghost danger" onclick="deletarSessao(${s.id}, '${s.titulo.replace(/'/g,"")}')">Deletar</button>
           </div>`;
         }).join('');
@@ -379,6 +392,32 @@ async function salvarEdicaoConteudo(){
   const st = document.getElementById('editar-status');
   if(!r.ok){ st.innerText = 'Erro ao salvar. Tente de novo.'; return; }
   st.innerText = 'Conteúdo atualizado. As respostas do aluno continuam salvas.';
+  await recarregar();
+}
+
+let sessaoDuplicandoId = null;
+
+function abrirDuplicar(sessaoId, titulo){
+  sessaoDuplicandoId = sessaoId;
+  document.getElementById('duplicar-aluno').innerHTML = document.getElementById('sessao-aluno').innerHTML;
+  document.getElementById('duplicar-titulo').value = titulo;
+  document.getElementById('duplicar-status').innerText = '';
+  document.getElementById('duplicar-card').classList.remove('hidden');
+  document.getElementById('duplicar-card').scrollIntoView({ behavior:'smooth' });
+}
+
+async function confirmarDuplicacao(){
+  const aluno_id = Number(document.getElementById('duplicar-aluno').value);
+  const titulo = document.getElementById('duplicar-titulo').value;
+  const st = document.getElementById('duplicar-status');
+  if(!titulo.trim()){ st.innerText = 'O título não pode ficar vazio.'; return; }
+  st.innerText = 'Duplicando...';
+  const rConteudo = await fetch('/api/conteudo-sessao', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ senha: senhaAtual, sessao_id: sessaoDuplicandoId }) });
+  if(!rConteudo.ok){ st.innerText = 'Erro ao buscar o conteúdo original.'; return; }
+  const dConteudo = await rConteudo.json();
+  const r = await fetch('/api/criar-sessao', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ senha: senhaAtual, aluno_id, titulo, conteudo_html: dConteudo.conteudo_html, data_sessao: '' }) });
+  if(!r.ok){ st.innerText = 'Erro ao duplicar. Confira o aluno escolhido.'; return; }
+  document.getElementById('duplicar-card').classList.add('hidden');
   await recarregar();
 }
 
