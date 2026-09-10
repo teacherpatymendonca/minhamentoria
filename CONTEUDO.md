@@ -4,11 +4,18 @@ Este arquivo documenta o "formato" que o HTML de cada lição (`conteudo_html`) 
 para que os tipos de exercício interativo funcionem. Quem gera o HTML da lição (numa conversa
 separada, fora deste repositório — ver regra no LEIA-ME.md) deve seguir esses esqueletos.
 
-O motor que interpreta essa marcação vive só em `public/aluno.html`. Nenhum desses exercícios
-corrige ou dá feedback automático de certo/errado — o aluno monta a resposta dele (liga, ordena,
-escolhe), isso é salvo, e ele confere sozinho depois com um `.reveal-btn`/`.reveal-content`
-(gabarito), do jeito que a caixa de texto já faz hoje. **Nunca declarar a resposta certa no DOM
-do exercício** — o gabarito vive só dentro do `.reveal-content`.
+O motor que interpreta essa marcação vive só em `public/aluno.html`. Por padrão nenhum desses
+exercícios corrige sozinho — o aluno monta a resposta (liga, ordena, escolhe), isso é salvo, e
+ele confere depois com um `.reveal-btn`/`.reveal-content` (gabarito em texto livre), do jeito
+que a caixa de texto já faz. **Para drag-and-drop e quiz existe também um gabarito automático
+opcional** (botão "Check answers", ver seção própria mais abaixo) — só liga quando você marca a
+resposta certa nos atributos `data-correta`/`data-coluna-certa`. Sem essa marcação, o exercício
+continua exatamente como antes (sem botão de conferir, sem gabarito automático). Como o gabarito
+automático precisa comparar com a resposta certa no navegador do aluno, ela fica sim declarada
+no HTML desses exercícios quando você usa esse recurso — não tem como evitar isso num app sem
+servidor de correção. Se preferir não expor a resposta certa no código-fonte da página, não
+declare `data-correta`/`data-coluna-certa` e o exercício fica só no modelo "o aluno confere
+sozinho depois", como sempre foi.
 
 ## Regra de ids
 
@@ -59,11 +66,14 @@ Mesmo motor pros quatro — peça solta (`.dnd-piece`) arrastada até um alvo, d
       <span class="dnd-piece" data-piece-id="p1">went</span>
       <span class="dnd-piece" data-piece-id="p2">saw</span>
     </div>
-    <p>Yesterday she <span class="dnd-target" data-target-id="t1"></span> to the market
-       and <span class="dnd-target" data-target-id="t2"></span> her friend there.</p>
+    <p>Yesterday she <span class="dnd-target" data-target-id="t1" data-correta="p1"></span> to the market
+       and <span class="dnd-target" data-target-id="t2" data-correta="p2"></span> her friend there.</p>
   </div>
 </section>
 ```
+`data-correta="p1"` é opcional — só coloque se quiser que esse exercício ganhe o botão "Check
+answers" (gabarito automático, ver seção própria abaixo). Sem esse atributo, o alvo fica do
+jeito de sempre, sem correção automática.
 
 **Unjumble** — alvos numa fileira (`.dnd-row`), sem prosa ao redor:
 ```html
@@ -78,10 +88,10 @@ Mesmo motor pros quatro — peça solta (`.dnd-piece`) arrastada até um alvo, d
       <span class="dnd-piece" data-piece-id="p4">I</span>
     </div>
     <div class="dnd-row">
-      <span class="dnd-target" data-target-id="t1"></span>
-      <span class="dnd-target" data-target-id="t2"></span>
-      <span class="dnd-target" data-target-id="t3"></span>
-      <span class="dnd-target" data-target-id="t4"></span>
+      <span class="dnd-target" data-target-id="t1" data-correta="p4"></span>
+      <span class="dnd-target" data-target-id="t2" data-correta="p3"></span>
+      <span class="dnd-target" data-target-id="t3" data-correta="p2"></span>
+      <span class="dnd-target" data-target-id="t4" data-correta="p1"></span>
     </div>
   </div>
 </section>
@@ -98,8 +108,8 @@ um alvo (coluna B):
       <span class="dnd-piece" data-piece-id="p1">to leave</span>
       <span class="dnd-piece" data-piece-id="p2">to arrive</span>
     </div>
-    <div class="dnd-row"><span class="dnd-label">sair</span><span class="dnd-target" data-target-id="t1"></span></div>
-    <div class="dnd-row"><span class="dnd-label">chegar</span><span class="dnd-target" data-target-id="t2"></span></div>
+    <div class="dnd-row"><span class="dnd-label">sair</span><span class="dnd-target" data-target-id="t1" data-correta="p1"></span></div>
+    <div class="dnd-row"><span class="dnd-label">chegar</span><span class="dnd-target" data-target-id="t2" data-correta="p2"></span></div>
   </div>
 </section>
 ```
@@ -112,9 +122,9 @@ várias peças cada. Use 2 ou 3 colunas:
   <div id="dnd-sort-1" class="dnd-exercise formato-sorting">
     <p class="qtext">Drag each item to the correct category.</p>
     <div class="dnd-bank">
-      <span class="dnd-piece" data-piece-id="p1">item 1</span>
-      <span class="dnd-piece" data-piece-id="p2">item 2</span>
-      <span class="dnd-piece" data-piece-id="p3">item 3</span>
+      <span class="dnd-piece" data-piece-id="p1" data-coluna-certa="c1">item 1</span>
+      <span class="dnd-piece" data-piece-id="p2" data-coluna-certa="c2">item 2</span>
+      <span class="dnd-piece" data-piece-id="p3" data-coluna-certa="c1">item 3</span>
     </div>
     <div class="dnd-columns">
       <div class="dnd-column" data-column-id="c1"><span class="dnd-column-label">Categoria A</span></div>
@@ -124,6 +134,8 @@ várias peças cada. Use 2 ou 3 colunas:
 </section>
 ```
 `data-column-id` só precisa ser único dentro do próprio exercício, igual `data-target-id`.
+`data-coluna-certa` (na peça, não na coluna) é a versão do sorting do `data-correta` — também
+opcional, só pro gabarito automático.
 
 ## Quiz (clique/seleção, sem drag)
 
@@ -133,12 +145,40 @@ várias peças cada. Use 2 ou 3 colunas:
   <div id="quiz-past-1" class="quiz-exercise">
     <p class="qtext">Which sentence is correct?</p>
     <div class="quiz-option" data-valor="a">She go to school every day.</div>
-    <div class="quiz-option" data-valor="b">She goes to school every day.</div>
+    <div class="quiz-option" data-valor="b" data-correta="true">She goes to school every day.</div>
   </div>
 </section>
 ```
 `data-valor` é o que fica salvo — use uma letra/código curto e fixo, não o texto da opção
 (se o texto for reescrito depois, a resposta salva do aluno não deve se perder).
+`data-correta="true"` na opção certa é opcional, só pro gabarito automático (ver seção abaixo) —
+sem isso, o quiz fica do jeito de sempre, sem correção automática.
+
+## Gabarito automático (botão "Check answers")
+
+Drag-and-drop e quiz podem ganhar um botão **"Check answers"** que marca cada peça/alvo/opção
+de verde (certo) ou vermelho (errado), sem travar o aluno — ele pode mexer de novo a qualquer
+momento (isso limpa a marcação e ele confere de novo depois). Nos itens errados aparece um
+link pequeno "see correct answer" que revela qual era a resposta certa, sem mudar o que o aluno
+respondeu.
+
+**Isso é 100% automático a partir da marcação** — não precisa (e não deve) colar o botão, nem
+escrever a lógica de comparação. O `aluno.html` sozinho:
+- detecta, em cada `.dnd-exercise`/`.quiz-exercise`, se existe pelo menos um
+  `data-correta`/`data-coluna-certa` dentro dele;
+- se existir, acrescenta o botão "Check answers" logo depois do exercício;
+- se **não** existir nenhum (exercício sem essa marcação — inclusive todo exercício criado
+  antes dessa funcionalidade existir), não acrescenta nada, e o exercício continua exatamente
+  como sempre foi, sem gabarito automático.
+
+Ou seja: **marcar a resposta certa é opcional, exercício por exercício.** Se quiser gabarito
+automático num exercício, marque `data-correta` em todo alvo/opção dele (ou `data-coluna-certa`
+em toda peça, no caso do sorting) — marcação parcial (só em alguns alvos) também funciona, os
+alvos sem marcação simplesmente não entram na conferência.
+
+**Não se aplica a caixa de texto livre** (`textarea`) — não existe "resposta certa" pra
+comparar nesse tipo, então esse recurso não tem efeito nenhum ali, e não deve ser usado com
+esse tipo de bloco.
 
 ## Flashcard
 
@@ -252,7 +292,9 @@ precisa (ou deve) colar — é automático, igual a pergunta de reflexão do fla
   `id="dnd-..."`, `.dnd-bank`, `.dnd-piece` + `data-piece-id`, `.dnd-target` + `data-target-id`,
   `.dnd-column` + `data-column-id` (sorting), `.dnd-label`, `.dnd-row`, `.quiz-exercise` com
   `id="quiz-..."`, `.quiz-option` + `data-valor`, `.flashcard` (pra detecção do baralho),
-  `.reveal-btn`/`.reveal-content` com `data-target`/`id` combinando.
+  `.reveal-btn`/`.reveal-content` com `data-target`/`id` combinando. `data-correta` (em
+  `.dnd-target` e `.quiz-option`) e `data-coluna-certa` (em `.dnd-piece`, sorting) também são
+  estruturais, mas **opcionais** — só ligam o gabarito automático quando presentes.
 - **Cosmético** (só CSS de layout, o JS nunca lê essas classes): `formato-fill`,
   `formato-unjumble`, `formato-matchup`, `formato-sorting`, `.reading-passage`, `.embed-video`,
   `.link-card` + `.link-card-label`/`.link-card-title`/`.link-card-url`. Pode remover sem quebrar

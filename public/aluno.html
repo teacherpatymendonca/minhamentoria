@@ -183,6 +183,18 @@ try{ var temaSalvo = sessionStorage.getItem('aluno-tema'); if(temaSalvo) documen
   .quiz-option.selected{border-color:var(--charcoal); background:var(--amber-1); font-weight:700;}
   .quiz-option.selected::before{border-color:var(--charcoal); background:var(--charcoal); box-shadow:inset 0 0 0 3px var(--amber-1);}
 
+  /* ---- Gabarito automático: botão "Check answers" (mesmo visual do .reveal-btn, classe
+     separada pra não entrar no seletor que liga o flip do flashcard) + marcação certo/errado
+     + link pequeno "see correct answer" nos itens errados. ---- */
+  .gabarito-btn{font-family:var(--font-label); font-weight:700; font-size:12px; letter-spacing:0.06em; text-transform:uppercase; background:none; border:1px solid var(--amber-bold); color:var(--ink-amber); padding:8px 16px; border-radius:20px; cursor:pointer; margin-top:14px; display:block;}
+  .gabarito-btn:hover{background:var(--amber-bold); color:var(--charcoal);}
+  .dnd-target.gabarito-certo, .dnd-piece.gabarito-certo, .quiz-option.gabarito-certo{border-color:#3f7d4a !important; background:#eaf3ec !important;}
+  .dnd-target.gabarito-errado, .dnd-piece.gabarito-errado, .quiz-option.gabarito-errado{border-color:var(--danger) !important; background:#fbebea !important;}
+  .gabarito-wrap{display:inline-block; margin:2px 6px;}
+  .gabarito-link{font-family:var(--font-label); font-size:11.5px; font-weight:600; color:var(--ink-amber); text-decoration:underline; text-underline-offset:2px; cursor:pointer; background:none; border:none; padding:0;}
+  .gabarito-link:hover{color:var(--amber-bold);}
+  .gabarito-revelado{display:block; margin-top:2px; font-size:12.5px; font-style:italic; color:var(--ink-amber);}
+
   /* ---- Exercício: flashcard (casca visual sobre reveal-btn/reveal-content já existente) ---- */
   section.block:has(.flashcard){background:transparent; box-shadow:none; border-top:none; padding:0;}
   .flashcard{background:#fff; border:1px solid var(--line); border-radius:16px; padding:32px 28px; margin:18px auto; text-align:center; max-width:400px; position:relative; box-shadow:0 18px 34px -18px rgba(0,0,0,0.45);}
@@ -288,6 +300,9 @@ const TEXTOS = {
   salvo: 'salvo',
   erroSalvar: 'erro ao salvar',
   dicaArrastar: 'Drag into place. You can move a piece again anytime.',
+  gabaritoBotao: 'Check answers',
+  gabaritoLinkVer: 'see correct answer',
+  gabaritoLinkEsconder: 'hide correct answer',
   finalizarBotao: "✅ I'm done with this session",
   finalizarDica: "This lets your teacher know you've finished. You can still edit afterwards.",
   finalizadaMsg: '✓ You finished this session. You can still come back and edit anytime.',
@@ -417,6 +432,7 @@ function render(d){
   });
   initDragDrop(d);
   initQuiz(d);
+  initGabarito();
   initFlashcards(d);
   adicionarPerguntaFechamento(d);
   carregarAcervo(d.sessao.id);
@@ -673,6 +689,7 @@ function soltarArrasteDnd(e){
   });
 
   dragState = null;
+  limparGabarito(container);
   salvarEstadoDnd(container);
 }
 
@@ -713,10 +730,121 @@ function initQuiz(d){
       opt.addEventListener('click', ()=>{
         container.querySelectorAll('.quiz-option').forEach(o=>o.classList.remove('selected'));
         opt.classList.add('selected');
+        limparGabarito(container);
         agendarSalvar(container.id, opt.dataset.valor);
       });
     });
   });
+}
+
+/* ---- Gabarito automático: botão "Check answers" nos exercícios dnd/quiz que vierem marcados
+   com data-correta (alvo único e quiz) ou data-coluna-certa (peça de sorting). Exercícios
+   antigos, sem essa marcação, simplesmente não ganham o botão — não tem gabarito pra conferir.
+   Não bloqueia o aluno: ele pode arrastar/escolher de novo a qualquer momento (isso já limpa
+   a marcação certo/errado anterior, ver limparGabarito() chamado no clique e no soltar). ---- */
+
+function exercicioTemGabarito(container){
+  if(container.classList.contains('quiz-exercise')){
+    return !!container.querySelector('.quiz-option[data-correta="true"]');
+  }
+  if(container.querySelector('.dnd-column')){
+    return !!container.querySelector('.dnd-piece[data-coluna-certa]');
+  }
+  return !!container.querySelector('.dnd-target[data-correta]');
+}
+
+function initGabarito(){
+  document.querySelectorAll('.dnd-exercise, .quiz-exercise').forEach(container=>{
+    if(!exercicioTemGabarito(container)) return;
+    if(container.nextElementSibling && container.nextElementSibling.classList.contains('gabarito-btn')) return;
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'gabarito-btn';
+    btn.textContent = TEXTOS.gabaritoBotao;
+    btn.addEventListener('click', ()=> conferirRespostas(container));
+    container.insertAdjacentElement('afterend', btn);
+  });
+}
+
+function conferirRespostas(container){
+  limparGabarito(container);
+  if(container.classList.contains('quiz-exercise')) return conferirQuiz(container);
+  if(container.querySelector('.dnd-column')) return conferirDndColunas(container);
+  return conferirDndAlvos(container);
+}
+
+function limparGabarito(container){
+  container.querySelectorAll('.gabarito-certo, .gabarito-errado').forEach(el=>{
+    el.classList.remove('gabarito-certo', 'gabarito-errado');
+  });
+  container.querySelectorAll('.gabarito-wrap').forEach(el=> el.remove());
+}
+
+// Pequeno link "see correct answer" — inserido logo depois do elemento errado (alvo, peça ou
+// opção de quiz), sem mexer na resposta que o aluno já deu.
+function inserirLinkGabarito(depoisDe, textoCorreto){
+  const wrap = document.createElement('span');
+  wrap.className = 'gabarito-wrap';
+  const link = document.createElement('button');
+  link.type = 'button';
+  link.className = 'gabarito-link';
+  link.textContent = TEXTOS.gabaritoLinkVer;
+  const revelado = document.createElement('span');
+  revelado.className = 'gabarito-revelado';
+  revelado.textContent = textoCorreto;
+  revelado.style.display = 'none';
+  link.addEventListener('click', ()=>{
+    const aberto = revelado.style.display !== 'none';
+    revelado.style.display = aberto ? 'none' : 'block';
+    link.textContent = aberto ? TEXTOS.gabaritoLinkVer : TEXTOS.gabaritoLinkEsconder;
+  });
+  wrap.appendChild(link);
+  wrap.appendChild(revelado);
+  depoisDe.insertAdjacentElement('afterend', wrap);
+}
+
+function conferirDndAlvos(container){
+  container.querySelectorAll('.dnd-target[data-correta]').forEach(target=>{
+    const pecaCerta = target.dataset.correta;
+    const pecaAtual = target.querySelector('.dnd-piece');
+    if(pecaAtual && pecaAtual.dataset.pieceId === pecaCerta){
+      target.classList.add('gabarito-certo');
+    } else {
+      target.classList.add('gabarito-errado');
+      const peca = container.querySelector('.dnd-piece[data-piece-id="' + pecaCerta + '"]');
+      inserirLinkGabarito(target, peca ? peca.textContent : pecaCerta);
+    }
+  });
+}
+
+function conferirDndColunas(container){
+  container.querySelectorAll('.dnd-piece[data-coluna-certa]').forEach(peca=>{
+    const colunaCerta = peca.dataset.colunaCerta;
+    const colunaAtual = peca.closest('.dnd-column');
+    if(colunaAtual && colunaAtual.dataset.columnId === colunaCerta){
+      peca.classList.add('gabarito-certo');
+    } else {
+      peca.classList.add('gabarito-errado');
+      const coluna = container.querySelector('.dnd-column[data-column-id="' + colunaCerta + '"] .dnd-column-label');
+      inserirLinkGabarito(peca, coluna ? coluna.textContent : colunaCerta);
+    }
+  });
+}
+
+function conferirQuiz(container){
+  const opcaoCerta = container.querySelector('.quiz-option[data-correta="true"]');
+  if(!opcaoCerta) return;
+  const selecionada = container.querySelector('.quiz-option.selected');
+  if(selecionada === opcaoCerta){
+    selecionada.classList.add('gabarito-certo');
+    return;
+  }
+  if(selecionada){
+    selecionada.classList.add('gabarito-errado');
+    inserirLinkGabarito(selecionada, opcaoCerta.textContent);
+  } else {
+    inserirLinkGabarito(container.lastElementChild, opcaoCerta.textContent);
+  }
 }
 
 /* ---- Baralho de flashcards: cards consecutivos (sem nenhum outro tipo de bloco no meio)
