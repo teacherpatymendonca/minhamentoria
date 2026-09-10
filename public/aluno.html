@@ -212,6 +212,9 @@ try{ var temaSalvo = sessionStorage.getItem('aluno-tema'); if(temaSalvo) documen
   .progresso-texto{font-family:var(--font-label); font-weight:700; font-size:11px; letter-spacing:0.1em; text-transform:uppercase; color:var(--amber-bold); text-align:center; margin-bottom:8px;}
   .progresso-barra{background:rgba(240,214,209,0.18); border-radius:20px; height:8px; overflow:hidden;}
   .progresso-preenchido{background:var(--amber-bold); height:100%; border-radius:20px; transition:width .4s ease;}
+  .lembrete-pendentes{max-width:900px; margin:0 auto 16px auto; padding:0 24px; text-align:center; font-family:var(--font-body); font-size:13.5px; font-style:italic; color:var(--muted);}
+  .lembrete-pendentes button{background:none; border:none; padding:0; margin-left:4px; font:inherit; font-style:normal; font-weight:600; color:var(--amber-bold); cursor:pointer; text-decoration:underline; text-underline-offset:2px;}
+  .lembrete-pendentes button:hover{color:var(--ink-amber);}
   .boas-vindas{max-width:900px; margin:0 auto 28px auto; padding:0 24px;}
   .boas-vindas-card{background:var(--amber-1); border:1px solid var(--amber-bold); border-radius:16px; padding:20px 26px; text-align:center; font-family:var(--font-display); font-style:italic; font-weight:600; font-size:17px; color:var(--ink-amber); box-shadow:0 1px 3px rgba(43,36,34,0.08), 0 20px 45px -22px rgba(103,0,16,0.28);}
   .acervo{max-width:900px; margin:0 auto 8px auto; padding:0 24px;}
@@ -274,6 +277,8 @@ const TEXTOS = {
     fechamentoPergunta: 'How was this session? What insights did you get?',
   alunoDesde: (data) => `With us since ${data}`,
   boasVindas: (nome) => `Welcome, ${nome}! This is your personal learning space.`,
+  lembretePendentes: (qtd) => qtd === 1 ? 'You have 1 unfinished session.' : `You have ${qtd} unfinished sessions.`,
+  lembreteLink: 'See your sessions',
 };
 document.title = TEXTOS.tituloPagina;
 document.getElementById('loading').textContent = TEXTOS.carregando;
@@ -368,6 +373,7 @@ function render(d){
       ${alunoDesdeHtml}
     </header>
     <div class="progresso" id="progresso"></div>
+    <div class="lembrete-pendentes" id="lembrete-pendentes"></div>
     <div class="acervo" id="acervo"></div>
     <div class="boas-vindas" id="boas-vindas"></div>
     <div id="conteudo-sessao">${d.sessao.conteudo_html}</div>
@@ -444,6 +450,7 @@ async function carregarAcervo(sessaoAtualId){
     if(!d.sessoes) return;
 
     renderProgresso(d.sessoes);
+    renderLembretePendentes(d.sessoes, sessaoAtualId);
 
     if(d.sessoes.length <= 1) return;
     const acervo = document.getElementById('acervo');
@@ -457,6 +464,22 @@ async function carregarAcervo(sessaoAtualId){
       <div class="acervo-lista" id="acervo-lista">${itens}</div>
     `;
   }catch(e){ }
+}
+
+// Lembrete gentil de sessões antigas ainda não finalizadas (não conta a sessão atual, o aluno já está nela).
+function renderLembretePendentes(sessoes, sessaoAtualId){
+  const el = document.getElementById('lembrete-pendentes');
+  if(!el) return;
+  const pendentes = sessoes.filter(s => !s.finalizada_em && s.id !== sessaoAtualId);
+  if(pendentes.length === 0){ el.innerHTML = ''; return; }
+  el.innerHTML = `${TEXTOS.lembretePendentes(pendentes.length)}<button onclick="abrirAcervoLista()">${TEXTOS.lembreteLink}</button>`;
+}
+
+function abrirAcervoLista(){
+  const lista = document.getElementById('acervo-lista');
+  if(!lista) return;
+  lista.classList.add('open');
+  lista.scrollIntoView({ behavior:'smooth', block:'center' });
 }
 
 function abrirSessao(id){
