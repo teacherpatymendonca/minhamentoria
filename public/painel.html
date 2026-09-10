@@ -142,7 +142,14 @@
       <h2>Alunos e sessões</h2>
       <p class="tagline">Toque numa sessão para ver as respostas.</p>
       <div id="aviso-novas" class="aviso-novas" style="display:none;"></div>
-      <input type="text" id="busca-aluno" placeholder="Buscar aluno pelo nome..." oninput="renderizar()" style="margin-bottom:14px;">
+      <div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:14px;">
+        <input type="text" id="busca-aluno" placeholder="Buscar aluno pelo nome..." oninput="renderizar()" style="flex:1; min-width:160px; margin-bottom:0;">
+        <select id="ordenar-alunos" onchange="renderizar()" style="width:auto; flex:0 0 200px;">
+          <option value="nome">Nome (A-Z)</option>
+          <option value="recente">Mais recente primeiro</option>
+          <option value="sessoes">Mais sessões primeiro</option>
+        </select>
+      </div>
       <div id="lista-alunos"></div>
     </div>
 
@@ -194,7 +201,15 @@ async function entrar(){
 }
 
 function renderizar(){
-  const alunosOrdenados = [...dadosPainel.alunos].sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR'));
+  const criterioOrdenacao = document.getElementById('ordenar-alunos')?.value || 'nome';
+  const contagemSessoes = {};
+  dadosPainel.sessoes.forEach(s => { contagemSessoes[s.aluno_id] = (contagemSessoes[s.aluno_id] || 0) + 1; });
+
+  const alunosOrdenados = [...dadosPainel.alunos].sort((a, b) => {
+    if(criterioOrdenacao === 'recente') return new Date(b.criado_em) - new Date(a.criado_em);
+    if(criterioOrdenacao === 'sessoes') return (contagemSessoes[b.id] || 0) - (contagemSessoes[a.id] || 0);
+    return a.nome.localeCompare(b.nome, 'pt-BR');
+  });
   const sel = document.getElementById('sessao-aluno');
   sel.innerHTML = alunosOrdenados.map(a => `<option value="${a.id}">${a.nome}</option>`).join('');
 
