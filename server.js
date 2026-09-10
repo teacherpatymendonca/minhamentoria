@@ -190,6 +190,15 @@ const server = http.createServer(async (req, res) => {
     }
     if (rota === '/' || rota === '/painel') { return servirArquivo(res, 'painel.html'); }
     if (rota === '/aluno') { return servirArquivo(res, 'aluno.html'); }
+    // Imagem de preview (Open Graph) usada quando o link é compartilhado (WhatsApp etc.)
+    if (rota === '/og-image.png') {
+      const caminho = path.join(__dirname, 'public', 'og-image.png');
+      return fs.readFile(caminho, (err, dados) => {
+        if (err) { res.writeHead(404); res.end('Imagem nao encontrada'); return; }
+        res.writeHead(200, { 'Content-Type': 'image/png', 'Cache-Control': 'public, max-age=86400' });
+        res.end(dados);
+      });
+    }
     res.writeHead(404, { 'Content-Type': 'text/plain; charset=utf-8' });
     res.end('Pagina nao encontrada');
   } catch (e) {
