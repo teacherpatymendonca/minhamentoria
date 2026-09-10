@@ -157,6 +157,7 @@
     <div class="card hidden" id="respostas-card">
       <h2 id="respostas-titulo">Respostas</h2>
       <div id="lista-respostas"></div>
+      <button class="ghost" onclick="baixarRespostas()">Baixar respostas</button>
       <button class="ghost" onclick="document.getElementById('respostas-card').classList.add('hidden')">Fechar</button>
     </div>
 
@@ -244,7 +245,7 @@ function renderizar(){
       : sessoesAluno.map(s => {
           const fin = s.finalizada_em ? '<span class="selo-fin">✓ finalizada</span>' : '<span class="selo-aberta">em aberto</span>';
           return `<div class="sessao-item"><strong>${s.titulo}</strong> ${fin}<br>
-            <button class="ghost" onclick="verRespostas(${s.id}, '${s.titulo.replace(/'/g,"")}')">Ver respostas</button>
+            <button class="ghost" onclick="verRespostas(${s.id}, '${s.titulo.replace(/'/g,"")}', '${a.nome.replace(/'/g,"")}', '${s.data_sessao || ''}')">Ver respostas</button>
             <button class="ghost" onclick="renomearSessao(${s.id}, '${s.titulo.replace(/'/g,"")}', '${s.data_sessao || ''}')">Renomear</button>
             <button class="ghost" onclick="editarConteudo(${s.id})">Editar conteúdo</button>
             <button class="ghost danger" onclick="deletarSessao(${s.id}, '${s.titulo.replace(/'/g,"")}')">Deletar</button>
@@ -309,7 +310,9 @@ async function criarSessao(){
   await recarregar();
 }
 
-async function verRespostas(sessaoId, titulo){
+let respostasAtuais = null;
+
+async function verRespostas(sessaoId, titulo, alunoNome, dataSessao){
   const r = await fetch('/api/respostas', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ senha: senhaAtual, sessao_id: sessaoId }) });
   const d = await r.json();
   document.getElementById('respostas-titulo').innerText = 'Respostas: ' + titulo;
@@ -319,10 +322,44 @@ async function verRespostas(sessaoId, titulo){
   } else {
     lista.innerHTML = d.respostas.map(r => `<div class="resposta-item"><div class="resposta-campo">${r.campo_id}</div>${r.valor || '<em>(vazio)</em>'}</div>`).join('');
   }
+  respostasAtuais = { titulo, alunoNome, dataSessao, respostas: d.respostas || [] };
   document.getElementById('respostas-card').classList.remove('hidden');
   document.getElementById('respostas-card').scrollIntoView({ behavior:'smooth' });
   await fetch('/api/marcar-vista', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ senha: senhaAtual, sessao_id: sessaoId }) });
   await recarregar();
+}
+
+// Monta um nome de arquivo simples (sem espaço, acento ou caractere especial) a partir de um texto qualquer.
+function nomeArquivoSeguro(texto){
+  return (texto || '')
+    .trim().toLowerCase()
+    .normalize('NFD').replace(/[^\x00-\x7F]/g, '')
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '') || 'sessao';
+}
+
+function baixarRespostas(){
+  if(!respostasAtuais) return;
+  const { titulo, alunoNome, dataSessao, respostas } = respostasAtuais;
+  const dataFormatada = formatarData(dataSessao) || 'não informada';
+
+  let texto = `Sessão: ${titulo}\nAluno: ${alunoNome}\nData da aula: ${dataFormatada}\n`;
+  texto += '-'.repeat(40) + '\n\n';
+  if(respostas.length === 0){
+    texto += 'O aluno ainda não respondeu nada nesta sessão.\n';
+  } else {
+    respostas.forEach(r => { texto += `${r.campo_id}:\n${r.valor || '(vazio)'}\n\n`; });
+  }
+
+  const blob = new Blob([texto], { type: 'text/plain;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = `respostas-${nomeArquivoSeguro(alunoNome)}-${nomeArquivoSeguro(titulo)}.txt`;
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  URL.revokeObjectURL(url);
 }
 
 async function editarConteudo(sessaoId){
