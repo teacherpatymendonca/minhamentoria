@@ -51,8 +51,6 @@
   .finalizada-msg{font-family:var(--font-label); font-weight:700; font-size:13px; color:var(--amber-bold); background:rgba(91,143,201,0.12); border:1px solid rgba(91,143,201,0.3); border-radius:24px; padding:14px 24px; display:inline-block;}
   .save-indicator{position:fixed; top:14px; right:14px; font-family:var(--font-label); font-weight:700; font-size:11px; letter-spacing:0.05em; background:var(--charcoal); color:var(--amber-bold); padding:6px 12px; border-radius:20px; opacity:0; transition:opacity .3s ease; z-index:100; border:1px solid rgba(91,143,201,0.3);}
   .save-indicator.show{opacity:1;}
-  .road{position:relative; height:52px; max-width:900px; margin:0 auto;}
-  .road svg{width:100%; height:100%; display:block;}
   .card{max-width:900px; background:var(--amber-3); border-radius:20px; padding:38px 42px; margin:0 auto; box-shadow:0 1px 3px rgba(43,36,34,0.08), 0 20px 45px -22px rgba(103,0,16,0.28);}
   /* Blindagem: mesmo sem a div .card, a seção já nasce com o fundo claro. Evita texto invisível se o conteúdo esquecer o wrapper. */
   section.block{max-width:900px; margin:0 auto; background:var(--amber-3); border-radius:20px; padding:38px 42px; box-shadow:0 1px 3px rgba(43,36,34,0.08), 0 20px 45px -22px rgba(103,0,16,0.28); border-top:4px solid var(--amber-bold); position:relative;}
@@ -191,6 +189,10 @@
   section.block.session-closing .kicker{color:var(--charcoal);}
   section.block.session-closing .qtext{font-family:var(--font-display); font-size:19px; font-weight:800; margin-bottom:14px;}
 
+  .progresso{max-width:320px; margin:0 auto 20px auto; padding:0 24px;}
+  .progresso-texto{font-family:var(--font-label); font-weight:700; font-size:11px; letter-spacing:0.1em; text-transform:uppercase; color:var(--amber-bold); text-align:center; margin-bottom:8px;}
+  .progresso-barra{background:rgba(240,214,209,0.18); border-radius:20px; height:8px; overflow:hidden;}
+  .progresso-preenchido{background:var(--amber-bold); height:100%; border-radius:20px; transition:width .4s ease;}
   .acervo{max-width:900px; margin:0 auto 8px auto; padding:0 24px;}
   .acervo-toggle{font-family:var(--font-label); font-weight:700; font-size:11.5px; letter-spacing:0.08em; text-transform:uppercase; color:var(--amber-bold); background:none; border:1px solid rgba(91,143,201,0.35); border-radius:20px; padding:7px 16px; cursor:pointer;}
   .acervo-toggle:hover{border-color:var(--amber-bold);}
@@ -238,6 +240,7 @@ const TEXTOS = {
   finalizadaMsg: '✓ You finished this session. You can still come back and edit anytime.',
   finalizarErro: 'Something went wrong. Please try again.',
   acervoToggle: (qtd) => `Suas sessões (${qtd})`,
+  progresso: (feitas, total) => `${feitas} de ${total} sessões concluídas`,
   respostaPlaceholder: 'Write your answer...',
   deckCardAnterior: 'Previous card',
   deckCardSeguinte: 'Next card',
@@ -316,8 +319,8 @@ function render(d){
       ${dataHtml}
       ${alunoDesdeHtml}
     </header>
+    <div class="progresso" id="progresso"></div>
     <div class="acervo" id="acervo"></div>
-    <div class="road"><svg viewBox="0 0 760 52" preserveAspectRatio="none"><line x1="0" y1="26" x2="760" y2="26" stroke="#c7ced6" stroke-width="2" stroke-dasharray="14 10" opacity="0.6"/></svg></div>
     <div id="conteudo-sessao">${d.sessao.conteudo_html}</div>
     <div class="finalizar-area" id="finalizar-area"></div>
   `;
@@ -359,11 +362,27 @@ async function finalizarSessao(){
   }
 }
 
+function renderProgresso(sessoes){
+  const el = document.getElementById('progresso');
+  const total = sessoes.length;
+  if(!el || total === 0) return;
+  const concluidas = sessoes.filter(s => s.finalizada_em).length;
+  const pct = Math.round((concluidas / total) * 100);
+  el.innerHTML = `
+    <div class="progresso-texto">${TEXTOS.progresso(concluidas, total)}</div>
+    <div class="progresso-barra"><div class="progresso-preenchido" style="width:${pct}%"></div></div>
+  `;
+}
+
 async function carregarAcervo(sessaoAtualId){
   try{
     const r = await fetch('/api/sessoes-aluno?codigo=' + encodeURIComponent(codigo));
     const d = await r.json();
-    if(!d.sessoes || d.sessoes.length <= 1) return;
+    if(!d.sessoes) return;
+
+    renderProgresso(d.sessoes);
+
+    if(d.sessoes.length <= 1) return;
     const acervo = document.getElementById('acervo');
     const itens = d.sessoes.map(s => {
       const atual = s.id === sessaoAtualId ? ' atual' : '';

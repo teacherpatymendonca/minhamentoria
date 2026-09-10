@@ -129,7 +129,7 @@ const server = http.createServer(async (req, res) => {
       if (!codigo) return responderJSON(res, 400, { erro: 'codigo' });
       const aluno = await db.execute({ sql: 'SELECT id FROM alunos WHERE codigo = ?', args: [codigo] });
       if (aluno.rows.length === 0) return responderJSON(res, 404, { erro: 'aluno' });
-      const sessoes = await db.execute({ sql: 'SELECT id, titulo, criada_em FROM sessoes WHERE aluno_id = ? ORDER BY criada_em DESC', args: [aluno.rows[0].id] });
+      const sessoes = await db.execute({ sql: 'SELECT id, titulo, criada_em, finalizada_em FROM sessoes WHERE aluno_id = ? ORDER BY criada_em DESC', args: [aluno.rows[0].id] });
       return responderJSON(res, 200, { sessoes: sessoes.rows });
     }
       if (rota === '/api/renomear-aluno' && req.method === 'POST') {
