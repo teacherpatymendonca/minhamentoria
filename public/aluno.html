@@ -4,6 +4,10 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>After the Lesson</title>
+<script>
+// Aplica o tema salvo (se houver) antes da página desenhar, pra não piscar o tema errado.
+try{ var temaSalvo = sessionStorage.getItem('aluno-tema'); if(temaSalvo) document.documentElement.setAttribute('data-theme', temaSalvo); }catch(e){}
+</script>
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%23cb4c46'/%3E%3Crect x='20' y='14' width='9' height='36' rx='2' fill='%23fff'/%3E%3Crect x='20' y='14' width='28' height='9' rx='2' fill='%23fff'/%3E%3Crect x='20' y='30' width='22' height='9' rx='2' fill='%23fff'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -27,15 +31,27 @@
     --font-display:'Fraunces',Georgia,'Times New Roman',serif;
     --font-label:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
     --font-body:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+    /* Modo escuro (padrão): fundo geral escuro, cards claros. */
+    --bg-pagina:var(--charcoal);
+    --cor-cabecalho:var(--white);
+    color-scheme:dark;
+  }
+  [data-theme="light"]{
+    /* Modo claro: inverte o fundo geral, mantendo os cards e as cores terracota/vinho. */
+    --bg-pagina:#f7f0ec;
+    --cor-cabecalho:var(--charcoal);
+    color-scheme:light;
   }
   *{box-sizing:border-box;}
   body{
-    margin:0; background:var(--charcoal);
+    margin:0; background:var(--bg-pagina);
     background-image:radial-gradient(circle at 15% 8%, rgba(91,143,201,0.08), transparent 40%),radial-gradient(circle at 85% 92%, rgba(91,143,201,0.06), transparent 45%);
     color:var(--charcoal); font-family:var(--font-body); line-height:1.6; padding:0 0 80px 0;
+    transition:background-color .2s ease;
   }
+  [data-theme="light"] body{background-image:none;}
   .wrap{max-width:900px; margin:0 auto; padding:0 24px;}
-  header{padding:56px 24px 40px 24px; text-align:center; color:var(--white);}
+  header{padding:56px 24px 40px 24px; text-align:center; color:var(--cor-cabecalho);}
   .eyebrow{font-family:var(--font-label); font-weight:700; font-size:12.5px; letter-spacing:0.14em; text-transform:uppercase; color:var(--amber-bold); margin-bottom:16px;}
   .logo{display:inline-flex; align-items:center; gap:14px; margin-bottom:22px;}
   .logo-mark{width:44px; height:44px; flex:0 0 auto;}
@@ -51,6 +67,9 @@
   .finalizada-msg{font-family:var(--font-label); font-weight:700; font-size:13px; color:var(--amber-bold); background:rgba(91,143,201,0.12); border:1px solid rgba(91,143,201,0.3); border-radius:24px; padding:14px 24px; display:inline-block;}
   .save-indicator{position:fixed; top:14px; right:14px; font-family:var(--font-label); font-weight:700; font-size:11px; letter-spacing:0.05em; background:var(--charcoal); color:var(--amber-bold); padding:6px 12px; border-radius:20px; opacity:0; transition:opacity .3s ease; z-index:100; border:1px solid rgba(91,143,201,0.3);}
   .save-indicator.show{opacity:1;}
+  .tema-toggle{position:fixed; top:14px; left:14px; width:36px; height:36px; padding:0; display:flex; align-items:center; justify-content:center; border-radius:50%; border:1px solid var(--line); background:var(--amber-3); color:var(--ink-amber); cursor:pointer; z-index:100;}
+  .tema-toggle:hover{border-color:var(--amber-bold);}
+  .tema-toggle svg{width:18px; height:18px;}
   .card{max-width:900px; background:var(--amber-3); border-radius:20px; padding:38px 42px; margin:0 auto; box-shadow:0 1px 3px rgba(43,36,34,0.08), 0 20px 45px -22px rgba(103,0,16,0.28);}
   /* Blindagem: mesmo sem a div .card, a seção já nasce com o fundo claro. Evita texto invisível se o conteúdo esquecer o wrapper. */
   section.block{max-width:900px; margin:0 auto; background:var(--amber-3); border-radius:20px; padding:38px 42px; box-shadow:0 1px 3px rgba(43,36,34,0.08), 0 20px 45px -22px rgba(103,0,16,0.28); border-top:4px solid var(--amber-bold); position:relative;}
@@ -78,7 +97,7 @@
   section.block:has(.embed-video)::before,
   section.block:has(.link-card)::before,
   section.block.session-closing::before{content:none; display:none;}
-  .msg{max-width:600px; margin:40px auto; text-align:center; color:var(--white); font-family:var(--font-display); font-weight:600; font-size:20px;}
+  .msg{max-width:600px; margin:40px auto; text-align:center; color:var(--cor-cabecalho); font-family:var(--font-display); font-weight:600; font-size:20px;}
   .kicker{font-family:var(--font-label); font-weight:700; font-size:11.5px; letter-spacing:0.12em; text-transform:uppercase; color:var(--ink-amber); margin-bottom:10px;}
   h2{font-family:var(--font-display); font-weight:800; font-size:28px; margin:0 0 6px 0; color:var(--charcoal);}
   h3{font-family:var(--font-display); font-weight:700; font-size:17px; margin:0 0 12px 0;}
@@ -210,6 +229,9 @@
 <body>
 
 <div class="save-indicator" id="save-indicator">salvando...</div>
+<button class="tema-toggle" id="tema-toggle" onclick="alternarTema()" aria-label="Alternar modo claro ou escuro" title="Alternar modo claro ou escuro">
+  <svg id="icone-tema" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></svg>
+</button>
 
 <div id="app">
   <div class="msg" id="loading">Carregando...</div>
@@ -253,6 +275,29 @@ const TEXTOS = {
 document.title = TEXTOS.tituloPagina;
 document.getElementById('loading').textContent = TEXTOS.carregando;
 document.getElementById('save-indicator').textContent = TEXTOS.salvando;
+
+// ---- Modo claro/escuro: lembrado só durante esta sessão do navegador (sessionStorage), não entre visitas diferentes. ----
+const TEMA_STORAGE_KEY = 'aluno-tema';
+const ICONE_SOL = '<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/>';
+const ICONE_LUA = '<path d="M20 14.5A8.5 8.5 0 0 1 9.5 4 8.5 8.5 0 1 0 20 14.5Z" fill="currentColor" stroke="none"/>';
+
+function temaAtual(){
+  try{ return sessionStorage.getItem(TEMA_STORAGE_KEY) || 'dark'; }catch(e){ return 'dark'; }
+}
+
+function aplicarTema(tema){
+  document.documentElement.setAttribute('data-theme', tema);
+  const icone = document.getElementById('icone-tema');
+  if(icone) icone.innerHTML = tema === 'light' ? ICONE_LUA : ICONE_SOL;
+}
+
+function alternarTema(){
+  const novo = temaAtual() === 'light' ? 'dark' : 'light';
+  try{ sessionStorage.setItem(TEMA_STORAGE_KEY, novo); }catch(e){}
+  aplicarTema(novo);
+}
+
+aplicarTema(temaAtual());
 
 const params = new URLSearchParams(location.search);
 const codigo = params.get('codigo');
