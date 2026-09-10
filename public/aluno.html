@@ -231,7 +231,8 @@ const TEXTOS = {
   deckRecomecar: 'Start again',
   flashReflectPergunta: 'What do you want to remember from these? Why?',
   fechamentoKicker: 'Before you go',
-  fechamentoPergunta: 'How was this session? What insights did you get?',
+    fechamentoPergunta: 'How was this session? What insights did you get?',
+  alunoDesde: (data) => `With us since ${data}`,
 };
 document.title = TEXTOS.tituloPagina;
 document.getElementById('loading').textContent = TEXTOS.carregando;
@@ -265,14 +266,21 @@ async function iniciar(){
 }
 
 function render(d){
-  const app = document.getElementById('app');
-  let dataHtml = '';
-  if(d.sessao.data_sessao){
-    const partes = d.sessao.data_sessao.split('-');
-    if(partes.length === 3){
-      const dt = new Date(Number(partes[0]), Number(partes[1]) - 1, Number(partes[2]));
-      const formatada = dt.toLocaleDateString('pt-BR', { day:'numeric', month:'long', year:'numeric' });
-      dataHtml = `<div class="header-data">${formatada}</div>`;
+  let alunoDesdeHtml = '';
+  if(d.data_inicio){
+    const partesDesde = d.data_inicio.split('-');
+    if(partesDesde.length === 3){
+      const dtDesde = new Date(Number(partesDesde[0]), Number(partesDesde[1]) - 1, Number(partesDesde[2]));
+      alunoDesdeHtml = `<div class="header-data">${TEXTOS.alunoDesde(dtDesde.toLocaleDateString('pt-BR', { day:'numeric', month:'long', year:'numeric' }))}</div>`;
+    }
+  }
+  app.innerHTML = `
+    <header>
+      <div class="eyebrow">${TEXTOS.eyebrow}</div>
+      <h1>${d.sessao.titulo}</h1>
+      ${dataHtml}
+      ${alunoDesdeHtml}
+    </header>
     }
   }
   app.innerHTML = `
@@ -408,7 +416,7 @@ function restaurarEstadoDnd(container, valorSalvo){
       if(target && piece){ target.appendChild(piece); target.classList.add('filled'); }
     });
   }
-}
+}f
 
 function iniciarArrasteDnd(e){
   const piece = e.currentTarget;
