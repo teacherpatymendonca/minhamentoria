@@ -83,6 +83,22 @@ try{ var temaSalvo = sessionStorage.getItem('aluno-tema'); if(temaSalvo) documen
   #conteudo-sessao > .card:last-child,
   #conteudo-sessao > .flashcard-group:last-child{margin-bottom:0;}
 
+  /* ---- Animações sutis: entrada suave dos blocos ao carregar a página ---- */
+  @keyframes entrada-suave{ from{opacity:0; transform:translateY(10px);} to{opacity:1; transform:translateY(0);} }
+  #conteudo-sessao > section.block,
+  #conteudo-sessao > .card,
+  #conteudo-sessao > .flashcard-group{animation-name:entrada-suave; animation-duration:.5s; animation-timing-function:ease; animation-fill-mode:both;}
+  #conteudo-sessao > *:nth-child(1){animation-delay:.05s;}
+  #conteudo-sessao > *:nth-child(2){animation-delay:.1s;}
+  #conteudo-sessao > *:nth-child(3){animation-delay:.15s;}
+  #conteudo-sessao > *:nth-child(4){animation-delay:.2s;}
+  #conteudo-sessao > *:nth-child(n+5){animation-delay:.25s;}
+  @media (prefers-reduced-motion: reduce){
+    #conteudo-sessao > section.block,
+    #conteudo-sessao > .card,
+    #conteudo-sessao > .flashcard-group{animation:none;}
+  }
+
   /* "Focus point": rótulo automático do bloco explicativo (o tipo "padrão", sem marcação especial).
      Suprimido nos tipos com identidade própria — exercícios, reading, link/embed, fechamento da sessão. */
   section.block::before{
@@ -141,6 +157,9 @@ try{ var temaSalvo = sessionStorage.getItem('aluno-tema'); if(temaSalvo) documen
   .dnd-piece{font-family:var(--font-display); font-weight:700; font-size:16px; background:#fff; border:1px solid var(--line); border-radius:20px; padding:6px 16px; cursor:grab; touch-action:none; user-select:none; -webkit-user-select:none; -webkit-touch-callout:none; box-shadow:0 3px 8px -4px rgba(0,0,0,0.3);}
   .dnd-piece:active{cursor:grabbing;}
   .dnd-piece.dragging{box-shadow:0 12px 30px -10px rgba(0,0,0,0.45); z-index:200;}
+  @keyframes encaixe-pulso{ 0%{transform:scale(1);} 40%{transform:scale(1.1);} 100%{transform:scale(1);} }
+  .dnd-piece.encaixou{animation:encaixe-pulso .3s ease;}
+  @media (prefers-reduced-motion: reduce){ .dnd-piece.encaixou{animation:none;} }
   .dnd-piece-placeholder{display:inline-block; visibility:hidden;}
   .dnd-target{display:inline-flex; align-items:center; justify-content:center; min-width:90px; min-height:34px; padding:4px 12px; margin:0 2px; border:2px dashed var(--line); border-radius:20px; background:var(--amber-2); vertical-align:middle;}
   .dnd-target.filled{border-style:solid; border-color:var(--amber-bold); background:#fff; padding:2px 4px;}
@@ -182,6 +201,13 @@ try{ var temaSalvo = sessionStorage.getItem('aluno-tema'); if(temaSalvo) documen
   .flashcard-deck{display:flex; flex-direction:column; align-items:center; gap:14px;}
   .deck-stage{display:flex; align-items:center; justify-content:center; gap:20px; width:100%;}
   .deck-hidden{display:none !important;}
+  @keyframes carta-entra{ from{opacity:0; transform:scale(.96);} to{opacity:1; transform:scale(1);} }
+  .deck-stage > section.block:not(.deck-hidden),
+  .deck-stage > .card:not(.deck-hidden){animation:carta-entra .25s ease;}
+  @media (prefers-reduced-motion: reduce){
+    .deck-stage > section.block:not(.deck-hidden),
+    .deck-stage > .card:not(.deck-hidden){animation:none;}
+  }
   .deck-nav-btn{flex:0 0 auto; width:42px; height:42px; border-radius:50%; border:1px solid var(--line); background:#fff; color:var(--ink-amber); font-size:17px; line-height:1; cursor:pointer; display:flex; align-items:center; justify-content:center; box-shadow:0 10px 20px -12px rgba(0,0,0,0.45); transition:border-color .15s ease, background .15s ease, color .15s ease;}
   .deck-nav-btn:hover:not(:disabled){border-color:var(--amber-bold);}
   .deck-nav-btn:disabled{opacity:.3; cursor:default; box-shadow:none;}
@@ -631,10 +657,12 @@ function soltarArrasteDnd(e){
   } else if(alvoValido && alvoValido.classList.contains('dnd-column')){
     // sorting: coluna aceita várias peças, não expulsa quem já tá lá
     alvoValido.appendChild(piece);
+    pulsarEncaixe(piece);
   } else if(alvoValido){
     const ocupante = alvoValido.querySelector('.dnd-piece');
     if(ocupante && ocupante !== piece){ banco.appendChild(ocupante); }
     alvoValido.appendChild(piece);
+    pulsarEncaixe(piece);
   } else {
     banco.appendChild(piece);
   }
@@ -646,6 +674,14 @@ function soltarArrasteDnd(e){
 
   dragState = null;
   salvarEstadoDnd(container);
+}
+
+// Pequena pulsação de confirmação quando uma peça encaixa num alvo/coluna válido.
+function pulsarEncaixe(piece){
+  piece.classList.remove('encaixou');
+  void piece.offsetWidth; // força reflow, pra animação poder rodar de novo em encaixes seguidos
+  piece.classList.add('encaixou');
+  piece.addEventListener('animationend', () => piece.classList.remove('encaixou'), { once:true });
 }
 
 function salvarEstadoDnd(container){
