@@ -142,6 +142,7 @@
       <h2>Alunos e sessões</h2>
       <p class="tagline">Toque numa sessão para ver as respostas.</p>
       <div id="aviso-novas" class="aviso-novas" style="display:none;"></div>
+      <input type="text" id="busca-aluno" placeholder="Buscar aluno pelo nome..." oninput="renderizar()" style="margin-bottom:14px;">
       <div id="lista-alunos"></div>
     </div>
 
@@ -197,9 +198,16 @@ function renderizar(){
   const sel = document.getElementById('sessao-aluno');
   sel.innerHTML = alunosOrdenados.map(a => `<option value="${a.id}">${a.nome}</option>`).join('');
 
+  const termoBusca = (document.getElementById('busca-aluno')?.value || '').trim().toLowerCase();
+  const alunosFiltrados = termoBusca ? alunosOrdenados.filter(a => a.nome.toLowerCase().includes(termoBusca)) : alunosOrdenados;
+
   const lista = document.getElementById('lista-alunos');
-  if(alunosOrdenados.length === 0){ lista.innerHTML = '<p class="small">Nenhum aluno ainda. Crie o primeiro acima.</p>'; return; }
-  lista.innerHTML = alunosOrdenados.map(a => {
+  if(alunosOrdenados.length === 0){
+    lista.innerHTML = '<p class="small">Nenhum aluno ainda. Crie o primeiro acima.</p>';
+  } else if(alunosFiltrados.length === 0){
+    lista.innerHTML = '<p class="small">Nenhum aluno encontrado.</p>';
+  } else {
+  lista.innerHTML = alunosFiltrados.map(a => {
     const sessoesAluno = dadosPainel.sessoes.filter(s => s.aluno_id === a.id);
     const link = `${location.origin}/aluno?codigo=${a.codigo}`;
     const qtd = sessoesAluno.length;
@@ -232,6 +240,7 @@ function renderizar(){
       </div>
     </div>`;
   }).join('');
+  }
 
   const totalNovas = dadosPainel.sessoes.filter(s => s.finalizada_em && (!s.vista_em || s.vista_em < s.finalizada_em)).length;
   const aviso = document.getElementById('aviso-novas');
