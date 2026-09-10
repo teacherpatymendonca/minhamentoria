@@ -102,7 +102,7 @@ try{ var temaSalvo = sessionStorage.getItem('aluno-tema'); if(temaSalvo) documen
   /* "Focus point": rótulo automático do bloco explicativo (o tipo "padrão", sem marcação especial).
      Suprimido nos tipos com identidade própria — exercícios, reading, link/embed, fechamento da sessão. */
   section.block::before{
-    content:'Focus point'; display:block;
+    content:'🎯 Focus point'; display:block;
     font-family:var(--font-label); font-weight:700; font-size:11.5px; letter-spacing:0.12em; text-transform:uppercase; color:var(--ink-amber); margin-bottom:10px;
   }
   section.block:has(.dnd-exercise)::before,
@@ -283,27 +283,27 @@ const TEXTOS = {
   carregando: 'Carregando...',
   linkInvalido: 'Link inválido. Peça o link certo para a sua professora.',
   semMaterial: (nome) => `Oi, ${nome || ''}! Ainda não há material aqui.`,
-  eyebrow: 'Time to expand',
+  eyebrow: '🌱 Time to expand',
   salvando: 'salvando...',
   salvo: 'salvo',
   erroSalvar: 'erro ao salvar',
   dicaArrastar: 'Drag into place. You can move a piece again anytime.',
-  finalizarBotao: "I'm done with this session",
+  finalizarBotao: "✅ I'm done with this session",
   finalizarDica: "This lets your teacher know you've finished. You can still edit afterwards.",
   finalizadaMsg: '✓ You finished this session. You can still come back and edit anytime.',
   finalizarErro: 'Something went wrong. Please try again.',
-  acervoToggle: (qtd) => `Suas sessões (${qtd})`,
+  acervoToggle: (qtd) => `📚 Suas sessões (${qtd})`,
   progresso: (feitas, total) => `${feitas} de ${total} sessões concluídas`,
   respostaPlaceholder: 'Write your answer...',
   deckCardAnterior: 'Previous card',
   deckCardSeguinte: 'Next card',
   deckRecomecar: 'Start again',
   flashReflectPergunta: 'What do you want to remember from these? Why?',
-  fechamentoKicker: 'Before you go',
+  fechamentoKicker: '👋 Before you go',
     fechamentoPergunta: 'How was this session? What insights did you get?',
   alunoDesde: (data) => `With us since ${data}`,
-  boasVindas: (nome) => `Welcome, ${nome}! This is your personal learning space.`,
-  lembretePendentes: (qtd) => qtd === 1 ? 'You have 1 unfinished session.' : `You have ${qtd} unfinished sessions.`,
+  boasVindas: (nome) => `👋 Welcome, ${nome}! This is your personal learning space.`,
+  lembretePendentes: (qtd) => qtd === 1 ? '⏳ You have 1 unfinished session.' : `⏳ You have ${qtd} unfinished sessions.`,
   lembreteLink: 'See your sessions',
 };
 document.title = TEXTOS.tituloPagina;

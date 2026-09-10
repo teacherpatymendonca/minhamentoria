@@ -111,7 +111,7 @@
 <div class="wrap">
 
   <div class="card" id="login-card">
-    <h2>Entrar</h2>
+    <h2>🔒 Entrar</h2>
     <p class="tagline">Só você acessa este painel.</p>
     <form onsubmit="entrar(); return false;">
       <input type="text" name="username" value="professor" autocomplete="username" style="display:none;" readonly>
@@ -125,7 +125,7 @@
   <div id="conteudo" class="hidden">
 
     <div class="card">
-      <h2>Novo aluno</h2>
+      <h2>📚 Novo aluno</h2>
       <p class="tagline">Cria o aluno e gera o link secreto dele.</p>
       <label>Nome do aluno</label>
       <input type="text" id="novo-nome" placeholder="Ex: nome do aluno">
@@ -136,7 +136,7 @@
     </div>
 
     <div class="card">
-      <h2>Nova sessão</h2>
+      <h2>📝 Nova sessão</h2>
       <p class="tagline">Cola aqui o material da aula (o HTML que o Claude gerar) e escolhe o aluno.</p>
       <label>Aluno</label>
       <select id="sessao-aluno"></select>
@@ -151,7 +151,7 @@
     </div>
 
     <div class="card">
-      <h2>Alunos e sessões</h2>
+      <h2>👥 Alunos e sessões</h2>
       <p class="tagline">Toque numa sessão para ver as respostas.</p>
       <div id="aviso-novas" class="aviso-novas" style="display:none;"></div>
       <div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:14px;">
@@ -166,14 +166,14 @@
     </div>
 
     <div class="card hidden" id="respostas-card">
-      <h2 id="respostas-titulo">Respostas</h2>
+      <h2 id="respostas-titulo">💬 Respostas</h2>
       <div id="lista-respostas"></div>
       <button class="ghost" onclick="baixarRespostas()">Baixar respostas</button>
       <button class="ghost" onclick="document.getElementById('respostas-card').classList.add('hidden')">Fechar</button>
     </div>
 
     <div class="card hidden" id="editar-card">
-      <h2>Editar conteúdo da sessão</h2>
+      <h2>✏️ Editar conteúdo da sessão</h2>
       <p class="tagline">Corrige o HTML sem apagar as respostas já salvas do aluno.</p>
       <textarea id="editar-conteudo" style="min-height:300px; font-family:var(--font-body); font-size:13px;"></textarea>
       <button onclick="salvarEdicaoConteudo()">Salvar conteúdo</button>
@@ -182,7 +182,7 @@
     </div>
 
     <div class="card hidden" id="duplicar-card">
-      <h2>Duplicar sessão</h2>
+      <h2>📄 Duplicar sessão</h2>
       <p class="tagline">Cria uma cópia com o mesmo conteúdo para outro aluno, sem as respostas do aluno original.</p>
       <label>Aluno de destino</label>
       <select id="duplicar-aluno"></select>
@@ -426,7 +426,7 @@ let respostasAtuais = null;
 async function verRespostas(sessaoId, titulo, alunoNome, dataSessao){
   const r = await fetch('/api/respostas', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ senha: senhaAtual, sessao_id: sessaoId }) });
   const d = await r.json();
-  document.getElementById('respostas-titulo').innerText = 'Respostas: ' + titulo;
+  document.getElementById('respostas-titulo').innerText = '💬 Respostas: ' + titulo;
   const lista = document.getElementById('lista-respostas');
   if(!d.respostas || d.respostas.length === 0){
     lista.innerHTML = '<p class="small">Este aluno ainda não respondeu nada nesta sessão.</p>';
