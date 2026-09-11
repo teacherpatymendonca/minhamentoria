@@ -552,6 +552,51 @@ function agendarSalvar(campoId, valor){
 
 let dragState = null;
 
+// ---- Auto-scroll durante o arrasto: quando o dedo/cursor chega perto do topo ou do
+// rodapé da tela, rola a página sozinha na direção correspondente, pra dar pra soltar a
+// peça num alvo que está fora da área visível. Funciona com toque e mouse porque só chama
+// window.scrollBy() por conta própria — não depende de gesto nativo de rolagem (que o
+// touch-action:none da peça bloqueia de propósito, pra não brigar com o arrasto). ----
+const AUTOSCROLL_BORDA = 70;
+const AUTOSCROLL_VELOCIDADE_MAX = 14;
+
+let autoScrollDirecao = 0;
+let autoScrollVelocidade = 0;
+let autoScrollFrame = null;
+
+function atualizarAutoScroll(clientY){
+  if(clientY < AUTOSCROLL_BORDA){
+    autoScrollDirecao = -1;
+    autoScrollVelocidade = AUTOSCROLL_VELOCIDADE_MAX * (1 - clientY / AUTOSCROLL_BORDA);
+  } else if(clientY > window.innerHeight - AUTOSCROLL_BORDA){
+    autoScrollDirecao = 1;
+    autoScrollVelocidade = AUTOSCROLL_VELOCIDADE_MAX * (1 - (window.innerHeight - clientY) / AUTOSCROLL_BORDA);
+  } else {
+    autoScrollDirecao = 0;
+  }
+  if(autoScrollDirecao !== 0 && autoScrollFrame === null){
+    autoScrollFrame = requestAnimationFrame(passoAutoScroll);
+  }
+}
+
+function passoAutoScroll(){
+  if(!dragState || autoScrollDirecao === 0){
+    autoScrollFrame = null;
+    return;
+  }
+  window.scrollBy(0, Math.max(4, autoScrollVelocidade) * autoScrollDirecao);
+  if(dragState.lastClientX !== undefined){
+    atualizarAlvoDrag(dragState.lastClientX, dragState.lastClientY);
+  }
+  autoScrollFrame = requestAnimationFrame(passoAutoScroll);
+}
+
+function pararAutoScroll(){
+  autoScrollDirecao = 0;
+  autoScrollVelocidade = 0;
+  if(autoScrollFrame !== null){ cancelAnimationFrame(autoScrollFrame); autoScrollFrame = null; }
+}
+
 function initDragDrop(d){
   document.querySelectorAll('[id^="dnd-"]').forEach(container=>{
     const banco = container.querySelector('.dnd-bank');
@@ -618,6 +663,17 @@ function iniciarArrasteDnd(e){
   document.addEventListener('pointercancel', soltarArrasteDnd);
 }
 
+function atualizarAlvoDrag(clientX, clientY){
+  const abaixo = document.elementFromPoint(clientX, clientY);
+  const alvo = abaixo ? abaixo.closest('.dnd-target, .dnd-column') : null;
+  const alvoValido = alvo && alvo.closest('[id^="dnd-"]') === dragState.container ? alvo : null;
+  if(dragState.alvoAtual !== alvoValido){
+    if(dragState.alvoAtual) dragState.alvoAtual.classList.remove('drag-over');
+    if(alvoValido) alvoValido.classList.add('drag-over');
+    dragState.alvoAtual = alvoValido;
+  }
+}
+
 function moverArrasteDnd(e){
   if(!dragState) return;
   const { piece } = dragState;
@@ -628,19 +684,16 @@ function moverArrasteDnd(e){
   if(Math.abs(e.clientX - dragState.startX) > 7 || Math.abs(e.clientY - dragState.startY) > 7){
     dragState.moved = true;
   }
-  const abaixo = document.elementFromPoint(e.clientX, e.clientY);
-  const alvo = abaixo ? abaixo.closest('.dnd-target, .dnd-column') : null;
-  const alvoValido = alvo && alvo.closest('[id^="dnd-"]') === dragState.container ? alvo : null;
-  if(dragState.alvoAtual !== alvoValido){
-    if(dragState.alvoAtual) dragState.alvoAtual.classList.remove('drag-over');
-    if(alvoValido) alvoValido.classList.add('drag-over');
-    dragState.alvoAtual = alvoValido;
-  }
+  dragState.lastClientX = e.clientX;
+  dragState.lastClientY = e.clientY;
+  atualizarAlvoDrag(e.clientX, e.clientY);
+  atualizarAutoScroll(e.clientY);
 }
 
 function soltarArrasteDnd(e){
   if(!dragState) return;
   const { piece, container, originParent, placeholder, moved } = dragState;
+  pararAutoScroll();
   document.removeEventListener('pointermove', moverArrasteDnd);
   document.removeEventListener('pointerup', soltarArrasteDnd);
   document.removeEventListener('pointercancel', soltarArrasteDnd);
