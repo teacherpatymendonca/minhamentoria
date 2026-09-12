@@ -414,6 +414,17 @@ function render(d){
     <div id="conteudo-sessao">${d.sessao.conteudo_html}</div>
     <div class="finalizar-area" id="finalizar-area"></div>
   `;
+  // <script> colado dentro do conteudo_html não executa sozinho quando inserido via
+  // innerHTML (o navegador bloqueia isso por padrão) — recria cada um pra rodar de verdade.
+  const container = document.getElementById('conteudo-sessao');
+  if (container) {
+    container.querySelectorAll('script').forEach(oldScript => {
+      const newScript = document.createElement('script');
+      [...oldScript.attributes].forEach(attr => newScript.setAttribute(attr.name, attr.value));
+      newScript.textContent = oldScript.textContent;
+      oldScript.parentNode.replaceChild(newScript, oldScript);
+    });
+  }
   document.querySelectorAll('textarea[id^="ta-"]').forEach(ta=>{
     if(d.respostas[ta.id] !== undefined){ ta.value = d.respostas[ta.id]; }
     ta.addEventListener('input', ()=>agendarSalvar(ta.id, ta.value));
