@@ -390,6 +390,7 @@ function render(d){
       alunoDesdeHtml = `<div class="header-data">${TEXTOS.alunoDesde(dtDesde.toLocaleDateString('en-US', { month:'long', day:'numeric', year:'numeric' }))}</div>`;
     }
   }
+  console.log('CONTEUDO_HTML:', d.sessao.conteudo_html ? d.sessao.conteudo_html.substring(0, 200) : 'VAZIO');
   app.innerHTML = `
     <header>
       <div class="logo">
