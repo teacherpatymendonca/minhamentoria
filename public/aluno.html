@@ -13,6 +13,19 @@
 <meta name="twitter:card" content="summary">
 <script>
 // Aplica o tema salvo (se houver) antes da página desenhar, pra não piscar o tema errado.
+// Tema visual infantil: ativado por ?tema=infantil (atributo data-tema, separado do data-theme claro/escuro).
+// A fonte Nunito só é carregada quando este tema está ativo. ?modo=claro|escuro escolhe o modo (útil pra testar).
+try{
+  var _q = new URLSearchParams(location.search);
+  var _m = _q.get('modo');
+  if(_m === 'claro' || _m === 'escuro') sessionStorage.setItem('aluno-tema', _m === 'claro' ? 'light' : 'dark');
+  if(_q.get('tema') === 'infantil'){
+    document.documentElement.setAttribute('data-tema', 'infantil');
+    var _f = document.createElement('link'); _f.rel = 'stylesheet';
+    _f.href = 'https://fonts.googleapis.com/css2?family=Nunito:ital,wght@0,400..900;1,400..900&display=swap';
+    document.head.appendChild(_f);
+  }
+}catch(e){}
 try{ var temaSalvo = sessionStorage.getItem('aluno-tema'); if(temaSalvo) document.documentElement.setAttribute('data-theme', temaSalvo); }catch(e){}
 </script>
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%23cb4c46'/%3E%3Crect x='20' y='14' width='9' height='36' rx='2' fill='%23fff'/%3E%3Crect x='20' y='14' width='28' height='9' rx='2' fill='%23fff'/%3E%3Crect x='20' y='30' width='22' height='9' rx='2' fill='%23fff'/%3E%3C/svg%3E">
@@ -55,6 +68,12 @@ try{ var temaSalvo = sessionStorage.getItem('aluno-tema'); if(temaSalvo) documen
     /* Cantos arredondados */
     --raio-etiqueta:6px; --raio-campo:8px; --raio-painel:10px; --raio-caixa:12px; --raio-opcao:14px;
     --raio-carta:16px; --raio-card:20px; --raio-pilula:20px; --raio-botao:24px; --raio-logo:40px;
+    /* Papéis novos (defaults = comportamento de sempre; o tema infantil troca): */
+    --sobre-destaque:var(--charcoal);        /* texto sobre fundos de destaque (botões) */
+    --muted-pagina:var(--muted);             /* textos cinza que ficam direto no fundo da página */
+    --destaque-pagina:var(--amber-bold);     /* textos coloridos que ficam direto no fundo da página */
+    --destaque-pagina-hover:var(--ink-amber);
+    --salvando-fundo:var(--charcoal); --salvando-texto:var(--amber-bold); /* aviso "salvando..." */
     --bg-pagina:var(--charcoal);
     --cor-cabecalho:var(--white);
     color-scheme:dark;
@@ -64,6 +83,38 @@ try{ var temaSalvo = sessionStorage.getItem('aluno-tema'); if(temaSalvo) documen
     --bg-pagina:#f7f0ec;
     --cor-cabecalho:var(--charcoal);
     color-scheme:light;
+  }
+  /* ==========================================================================
+     TEMA INFANTIL — paleta "Pôr do sol". Ativa com ?tema=infantil (atributo data-tema="infantil"
+     na tag <html>, separado do data-theme claro/escuro). Só troca variáveis; sem o atributo, nada aqui vale.
+     Contraste: texto branco sobre o coral (#D2422E) = 4,6:1; ameixa sobre creme = 11,7:1; demais pares conferidos (>= 4,5:1).
+     ========================================================================== */
+  [data-tema="infantil"]{
+    --charcoal:#4A235A; --white:#ffffff; --muted:#7A5A88;
+    --amber-bold:#D2422E; --amber-1:#FFE9B3; --amber-2:#FFF3DA; --amber-3:#FFFDF9;
+    --ink-amber:#4A235A; --danger:#B3172B; --line:#D9C3E0;
+    --font-display:'Nunito',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+    --font-label:'Nunito',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+    --font-body:'Nunito',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+    /* Modo escuro (padrão do app): fundo ameixa escuro, títulos cremes, cards claros. */
+    --bg-pagina:#2A1436; --cor-cabecalho:#FFF6EA;
+    --sobre-destaque:#ffffff; --muted-pagina:#D9C3E5; --destaque-pagina:#FF8F7E; --destaque-pagina-hover:#FFC94D;
+    --salvando-fundo:#4A235A; --salvando-texto:#FFC94D;
+    --cinza-texto:#6E4F7C; --cinza-escuro:#3A1A48; --cinza-pausa:#75567F; --cinza-suave:#6E4F7C;
+    --certo-borda:#2E7D46; --certo-fundo:#E6F4EA; --errado-fundo:#FDE8EA;
+    --azul-antigo-rgb:210,66,46;   /* (nome herdado) aqui vira o coral, só como transparência */
+    --sombra-card:0 2px 4px rgba(74,35,90,0.08), 0 18px 36px -18px rgba(74,35,90,0.38);
+    --progresso-trilha:rgba(255,246,234,0.18);
+    --logo-fundo:#4A235A; --logo-simbolo:#FFC94D; --logo-texto:#ffffff;
+    /* Cantos bem arredondados */
+    --raio-etiqueta:10px; --raio-campo:12px; --raio-painel:16px; --raio-caixa:18px; --raio-opcao:20px;
+    --raio-carta:24px; --raio-card:28px; --raio-pilula:999px; --raio-botao:999px; --raio-logo:999px;
+  }
+  [data-tema="infantil"][data-theme="light"]{
+    /* Modo claro: fundo creme, títulos ameixa. */
+    --bg-pagina:#FFF6EA; --cor-cabecalho:#4A235A;
+    --muted-pagina:#7A5A88; --destaque-pagina:#B93624; --destaque-pagina-hover:#4A235A;
+    --progresso-trilha:rgba(74,35,90,0.14);
   }
   *{box-sizing:border-box;}
   body{
@@ -79,15 +130,15 @@ try{ var temaSalvo = sessionStorage.getItem('aluno-tema'); if(temaSalvo) documen
   .logo-pill{display:inline-flex; align-items:center; gap:12px; background:var(--amber-bold); padding:12px 26px; border-radius:var(--raio-logo);}
   .logo-mark{width:32px; height:32px; flex:0 0 auto;}
   .logo-nome{font-family:var(--font-display); font-style:italic; font-weight:700; font-size:26px; color:var(--logo-texto); line-height:1;}
-  .logo-professor{font-family:var(--font-label); font-weight:600; font-size:10px; letter-spacing:0.1em; text-transform:uppercase; color:var(--muted);}
+  .logo-professor{font-family:var(--font-label); font-weight:600; font-size:10px; letter-spacing:0.1em; text-transform:uppercase; color:var(--muted-pagina);}
   h1{font-family:var(--font-display); font-weight:900; font-size:clamp(30px,4.5vw,44px); line-height:1.15; margin:0;}
-  .header-data{font-family:var(--font-body); font-weight:400; font-style:italic; font-size:15px; color:var(--muted); margin-top:12px;}
+  .header-data{font-family:var(--font-body); font-weight:400; font-style:italic; font-size:15px; color:var(--muted-pagina); margin-top:12px;}
   .finalizar-area{max-width:900px; margin:32px auto 0 auto; padding:0 24px; text-align:center;}
-  .finalizar-btn{font-family:var(--font-label); font-weight:700; font-size:13px; letter-spacing:0.06em; text-transform:uppercase; background:var(--amber-bold); border:none; color:var(--charcoal); padding:14px 28px; border-radius:var(--raio-botao); cursor:pointer;}
-  .finalizar-btn:hover{background:var(--amber-2);}
-  .finalizar-hint{font-size:13px; color:var(--muted); margin-top:12px;}
-  .finalizada-msg{font-family:var(--font-label); font-weight:700; font-size:13px; color:var(--amber-bold); background:rgba(var(--azul-antigo-rgb),0.12); border:1px solid rgba(var(--azul-antigo-rgb),0.3); border-radius:var(--raio-botao); padding:14px 24px; display:inline-block;}
-  .save-indicator{position:fixed; top:14px; right:14px; font-family:var(--font-label); font-weight:700; font-size:11px; letter-spacing:0.05em; background:var(--charcoal); color:var(--amber-bold); padding:6px 12px; border-radius:var(--raio-pilula); opacity:0; transition:opacity .3s ease; z-index:100; border:1px solid rgba(var(--azul-antigo-rgb),0.3);}
+  .finalizar-btn{font-family:var(--font-label); font-weight:700; font-size:13px; letter-spacing:0.06em; text-transform:uppercase; background:var(--amber-bold); border:none; color:var(--sobre-destaque); padding:14px 28px; border-radius:var(--raio-botao); cursor:pointer;}
+  .finalizar-btn:hover{background:var(--amber-2); color:var(--charcoal);}
+  .finalizar-hint{font-size:13px; color:var(--muted-pagina); margin-top:12px;}
+  .finalizada-msg{font-family:var(--font-label); font-weight:700; font-size:13px; color:var(--destaque-pagina); background:rgba(var(--azul-antigo-rgb),0.12); border:1px solid rgba(var(--azul-antigo-rgb),0.3); border-radius:var(--raio-botao); padding:14px 24px; display:inline-block;}
+  .save-indicator{position:fixed; top:14px; right:14px; font-family:var(--font-label); font-weight:700; font-size:11px; letter-spacing:0.05em; background:var(--salvando-fundo); color:var(--salvando-texto); padding:6px 12px; border-radius:var(--raio-pilula); opacity:0; transition:opacity .3s ease; z-index:100; border:1px solid rgba(var(--azul-antigo-rgb),0.3);}
   .save-indicator.show{opacity:1;}
   .tema-toggle{position:fixed; top:14px; left:14px; width:36px; height:36px; padding:0; display:flex; align-items:center; justify-content:center; border-radius:50%; border:1px solid var(--line); background:var(--amber-3); color:var(--ink-amber); cursor:pointer; z-index:100;}
   .tema-toggle:hover{border-color:var(--amber-bold);}
@@ -167,7 +218,7 @@ try{ var temaSalvo = sessionStorage.getItem('aluno-tema'); if(temaSalvo) documen
   .word-chip{font-family:var(--font-display); font-weight:700; font-size:16px; background:var(--superficie); border:1px solid var(--line); border-radius:var(--raio-pilula); padding:6px 16px;} .word-chip strong{color:var(--ink-amber);}
   .drill-lines{font-family:var(--font-display); font-weight:600; font-size:18px; line-height:2; margin:18px 0;} .drill-lines strong{color:var(--ink-amber);}
   .reveal-btn{font-family:var(--font-label); font-weight:700; font-size:12px; letter-spacing:0.06em; text-transform:uppercase; background:none; border:1px solid var(--amber-bold); color:var(--ink-amber); padding:8px 16px; border-radius:var(--raio-pilula); cursor:pointer; margin-top:8px;}
-  .reveal-btn:hover{background:var(--amber-bold); color:var(--charcoal);}
+  .reveal-btn:hover{background:var(--amber-bold); color:var(--sobre-destaque);}
   .reveal-content{display:none; margin-top:16px; padding-top:16px; border-top:1px dashed var(--line); font-size:14.5px;}
   .reveal-content.open{display:block;} .reveal-content p{margin:0 0 10px 0;}
 
@@ -209,7 +260,7 @@ try{ var temaSalvo = sessionStorage.getItem('aluno-tema'); if(temaSalvo) documen
      separada pra não entrar no seletor que liga o flip do flashcard) + marcação certo/errado
      + link pequeno "see correct answer" nos itens errados. ---- */
   .gabarito-btn{font-family:var(--font-label); font-weight:700; font-size:12px; letter-spacing:0.06em; text-transform:uppercase; background:none; border:1px solid var(--amber-bold); color:var(--ink-amber); padding:8px 16px; border-radius:var(--raio-pilula); cursor:pointer; margin-top:14px; display:block;}
-  .gabarito-btn:hover{background:var(--amber-bold); color:var(--charcoal);}
+  .gabarito-btn:hover{background:var(--amber-bold); color:var(--sobre-destaque);}
   .dnd-target.gabarito-certo, .dnd-piece.gabarito-certo, .quiz-option.gabarito-certo{border-color:var(--certo-borda) !important; background:var(--certo-fundo) !important;}
   .dnd-target.gabarito-errado, .dnd-piece.gabarito-errado, .quiz-option.gabarito-errado{border-color:var(--danger) !important; background:var(--errado-fundo) !important;}
   .gabarito-wrap{display:inline-block; margin:2px 6px;}
@@ -245,7 +296,7 @@ try{ var temaSalvo = sessionStorage.getItem('aluno-tema'); if(temaSalvo) documen
   .deck-nav-btn{flex:0 0 auto; width:42px; height:42px; border-radius:50%; border:1px solid var(--line); background:var(--superficie); color:var(--ink-amber); font-size:17px; line-height:1; cursor:pointer; display:flex; align-items:center; justify-content:center; box-shadow:0 10px 20px -12px rgba(0,0,0,0.45); transition:border-color .15s ease, background .15s ease, color .15s ease;}
   .deck-nav-btn:hover:not(:disabled){border-color:var(--amber-bold);}
   .deck-nav-btn:disabled{opacity:.3; cursor:default; box-shadow:none;}
-  .deck-nav-btn.restart{background:var(--amber-bold); border-color:var(--amber-bold); color:var(--charcoal);}
+  .deck-nav-btn.restart{background:var(--amber-bold); border-color:var(--amber-bold); color:var(--sobre-destaque);}
   .deck-counter{font-family:var(--font-label); font-weight:700; font-size:11px; letter-spacing:0.08em; text-transform:uppercase; color:var(--muted);}
 
   /* ---- Reading: passagem curta pro professor colar ---- */
@@ -269,16 +320,16 @@ try{ var temaSalvo = sessionStorage.getItem('aluno-tema'); if(temaSalvo) documen
   section.block.session-closing .qtext{font-family:var(--font-display); font-size:19px; font-weight:800; margin-bottom:14px;}
 
   .progresso{max-width:320px; margin:0 auto 20px auto; padding:0 24px;}
-  .progresso-texto{font-family:var(--font-label); font-weight:700; font-size:11px; letter-spacing:0.1em; text-transform:uppercase; color:var(--amber-bold); text-align:center; margin-bottom:8px;}
+  .progresso-texto{font-family:var(--font-label); font-weight:700; font-size:11px; letter-spacing:0.1em; text-transform:uppercase; color:var(--destaque-pagina); text-align:center; margin-bottom:8px;}
   .progresso-barra{background:var(--progresso-trilha); border-radius:var(--raio-pilula); height:8px; overflow:hidden;}
   .progresso-preenchido{background:var(--amber-bold); height:100%; border-radius:var(--raio-pilula); transition:width .4s ease;}
-  .lembrete-pendentes{max-width:900px; margin:0 auto 16px auto; padding:0 24px; text-align:center; font-family:var(--font-body); font-size:13.5px; font-style:italic; color:var(--muted);}
-  .lembrete-pendentes button{background:none; border:none; padding:0; margin-left:4px; font:inherit; font-style:normal; font-weight:600; color:var(--amber-bold); cursor:pointer; text-decoration:underline; text-underline-offset:2px;}
-  .lembrete-pendentes button:hover{color:var(--ink-amber);}
+  .lembrete-pendentes{max-width:900px; margin:0 auto 16px auto; padding:0 24px; text-align:center; font-family:var(--font-body); font-size:13.5px; font-style:italic; color:var(--muted-pagina);}
+  .lembrete-pendentes button{background:none; border:none; padding:0; margin-left:4px; font:inherit; font-style:normal; font-weight:600; color:var(--destaque-pagina); cursor:pointer; text-decoration:underline; text-underline-offset:2px;}
+  .lembrete-pendentes button:hover{color:var(--destaque-pagina-hover);}
   .boas-vindas{max-width:900px; margin:0 auto 28px auto; padding:0 24px;}
   .boas-vindas-card{background:var(--amber-1); border:1px solid var(--amber-bold); border-radius:var(--raio-carta); padding:20px 26px; text-align:center; font-family:var(--font-display); font-style:italic; font-weight:600; font-size:17px; color:var(--ink-amber); box-shadow:var(--sombra-card);}
   .acervo{max-width:900px; margin:0 auto 8px auto; padding:0 24px;}
-  .acervo-toggle{font-family:var(--font-label); font-weight:700; font-size:11.5px; letter-spacing:0.08em; text-transform:uppercase; color:var(--amber-bold); background:none; border:1px solid rgba(var(--azul-antigo-rgb),0.35); border-radius:var(--raio-pilula); padding:7px 16px; cursor:pointer;}
+  .acervo-toggle{font-family:var(--font-label); font-weight:700; font-size:11.5px; letter-spacing:0.08em; text-transform:uppercase; color:var(--destaque-pagina); background:none; border:1px solid rgba(var(--azul-antigo-rgb),0.35); border-radius:var(--raio-pilula); padding:7px 16px; cursor:pointer;}
   .acervo-toggle:hover{border-color:var(--amber-bold);}
   .acervo-lista{display:none; margin-top:12px; background:var(--amber-3); border-radius:var(--raio-painel); padding:10px 14px;}
   .acervo-lista.open{display:block;}
@@ -546,7 +597,7 @@ function abrirAcervoLista(){
 }
 
 function abrirSessao(id){
-  window.location.href = '/aluno?codigo=' + encodeURIComponent(codigo) + '&sessao=' + id;
+  window.location.href = '/aluno?codigo=' + encodeURIComponent(codigo) + '&sessao=' + id + (document.documentElement.getAttribute('data-tema') ? '&tema=' + document.documentElement.getAttribute('data-tema') : '');
 }
 
 let timers = {};
