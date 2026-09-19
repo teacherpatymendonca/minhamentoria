@@ -39,6 +39,22 @@ try{ var temaSalvo = sessionStorage.getItem('aluno-tema'); if(temaSalvo) documen
     --font-label:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
     --font-body:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
     /* Modo escuro (padrão): fundo geral escuro, cards claros. */
+    /* ---- Variáveis extras (etapa "faxina"): valores idênticos aos que estavam soltos no CSS. ---- */
+    /* Superfícies e textos que eram #fff / cinzas fixos */
+    --superficie:#fff; --logo-texto:#fff; --fundo-video:#000;
+    --cinza-texto:#6b7178; --cinza-escuro:#33383e; --cinza-pausa:#8b929a; --cinza-suave:#80868d;
+    /* Gabarito (certo/errado). A borda do errado usa --danger. */
+    --certo-borda:#3f7d4a; --certo-fundo:#eaf3ec; --errado-fundo:#fbebea;
+    /* Azul antigo (sobra da paleta original): só os números R,G,B, usados com transparência em rgba(). */
+    --azul-antigo-rgb:91,143,201;
+    /* Sombras e tons avermelhados */
+    --sombra-card:0 1px 3px rgba(43,36,34,0.08), 0 20px 45px -22px rgba(103,0,16,0.28);
+    --progresso-trilha:rgba(240,214,209,0.18);
+    /* Logo em SVG */
+    --logo-fundo:#670010; --logo-simbolo:#fff;
+    /* Cantos arredondados */
+    --raio-etiqueta:6px; --raio-campo:8px; --raio-painel:10px; --raio-caixa:12px; --raio-opcao:14px;
+    --raio-carta:16px; --raio-card:20px; --raio-pilula:20px; --raio-botao:24px; --raio-logo:40px;
     --bg-pagina:var(--charcoal);
     --cor-cabecalho:var(--white);
     color-scheme:dark;
@@ -52,7 +68,7 @@ try{ var temaSalvo = sessionStorage.getItem('aluno-tema'); if(temaSalvo) documen
   *{box-sizing:border-box;}
   body{
     margin:0; background:var(--bg-pagina);
-    background-image:radial-gradient(circle at 15% 8%, rgba(91,143,201,0.08), transparent 40%),radial-gradient(circle at 85% 92%, rgba(91,143,201,0.06), transparent 45%);
+    background-image:radial-gradient(circle at 15% 8%, rgba(var(--azul-antigo-rgb),0.08), transparent 40%),radial-gradient(circle at 85% 92%, rgba(var(--azul-antigo-rgb),0.06), transparent 45%);
     color:var(--charcoal); font-family:var(--font-body); line-height:1.6; padding:0 0 80px 0;
     transition:background-color .2s ease;
   }
@@ -60,25 +76,25 @@ try{ var temaSalvo = sessionStorage.getItem('aluno-tema'); if(temaSalvo) documen
   .wrap{max-width:900px; margin:0 auto; padding:0 24px;}
   header{padding:56px 24px 40px 24px; text-align:center; color:var(--cor-cabecalho);}
   .logo{display:inline-flex; flex-direction:column; align-items:center; gap:10px; margin-bottom:22px;}
-  .logo-pill{display:inline-flex; align-items:center; gap:12px; background:var(--amber-bold); padding:12px 26px; border-radius:40px;}
+  .logo-pill{display:inline-flex; align-items:center; gap:12px; background:var(--amber-bold); padding:12px 26px; border-radius:var(--raio-logo);}
   .logo-mark{width:32px; height:32px; flex:0 0 auto;}
-  .logo-nome{font-family:var(--font-display); font-style:italic; font-weight:700; font-size:26px; color:#fff; line-height:1;}
+  .logo-nome{font-family:var(--font-display); font-style:italic; font-weight:700; font-size:26px; color:var(--logo-texto); line-height:1;}
   .logo-professor{font-family:var(--font-label); font-weight:600; font-size:10px; letter-spacing:0.1em; text-transform:uppercase; color:var(--muted);}
   h1{font-family:var(--font-display); font-weight:900; font-size:clamp(30px,4.5vw,44px); line-height:1.15; margin:0;}
   .header-data{font-family:var(--font-body); font-weight:400; font-style:italic; font-size:15px; color:var(--muted); margin-top:12px;}
   .finalizar-area{max-width:900px; margin:32px auto 0 auto; padding:0 24px; text-align:center;}
-  .finalizar-btn{font-family:var(--font-label); font-weight:700; font-size:13px; letter-spacing:0.06em; text-transform:uppercase; background:var(--amber-bold); border:none; color:var(--charcoal); padding:14px 28px; border-radius:24px; cursor:pointer;}
+  .finalizar-btn{font-family:var(--font-label); font-weight:700; font-size:13px; letter-spacing:0.06em; text-transform:uppercase; background:var(--amber-bold); border:none; color:var(--charcoal); padding:14px 28px; border-radius:var(--raio-botao); cursor:pointer;}
   .finalizar-btn:hover{background:var(--amber-2);}
   .finalizar-hint{font-size:13px; color:var(--muted); margin-top:12px;}
-  .finalizada-msg{font-family:var(--font-label); font-weight:700; font-size:13px; color:var(--amber-bold); background:rgba(91,143,201,0.12); border:1px solid rgba(91,143,201,0.3); border-radius:24px; padding:14px 24px; display:inline-block;}
-  .save-indicator{position:fixed; top:14px; right:14px; font-family:var(--font-label); font-weight:700; font-size:11px; letter-spacing:0.05em; background:var(--charcoal); color:var(--amber-bold); padding:6px 12px; border-radius:20px; opacity:0; transition:opacity .3s ease; z-index:100; border:1px solid rgba(91,143,201,0.3);}
+  .finalizada-msg{font-family:var(--font-label); font-weight:700; font-size:13px; color:var(--amber-bold); background:rgba(var(--azul-antigo-rgb),0.12); border:1px solid rgba(var(--azul-antigo-rgb),0.3); border-radius:var(--raio-botao); padding:14px 24px; display:inline-block;}
+  .save-indicator{position:fixed; top:14px; right:14px; font-family:var(--font-label); font-weight:700; font-size:11px; letter-spacing:0.05em; background:var(--charcoal); color:var(--amber-bold); padding:6px 12px; border-radius:var(--raio-pilula); opacity:0; transition:opacity .3s ease; z-index:100; border:1px solid rgba(var(--azul-antigo-rgb),0.3);}
   .save-indicator.show{opacity:1;}
   .tema-toggle{position:fixed; top:14px; left:14px; width:36px; height:36px; padding:0; display:flex; align-items:center; justify-content:center; border-radius:50%; border:1px solid var(--line); background:var(--amber-3); color:var(--ink-amber); cursor:pointer; z-index:100;}
   .tema-toggle:hover{border-color:var(--amber-bold);}
   .tema-toggle svg{width:18px; height:18px;}
-  .card{max-width:900px; background:var(--amber-3); border-radius:20px; padding:38px 42px; margin:0 auto; box-shadow:0 1px 3px rgba(43,36,34,0.08), 0 20px 45px -22px rgba(103,0,16,0.28);}
+  .card{max-width:900px; background:var(--amber-3); border-radius:var(--raio-card); padding:38px 42px; margin:0 auto; box-shadow:var(--sombra-card);}
   /* Blindagem: mesmo sem a div .card, a seção já nasce com o fundo claro. Evita texto invisível se o conteúdo esquecer o wrapper. */
-  section.block{max-width:900px; margin:0 auto; background:var(--amber-3); border-radius:20px; padding:38px 42px; box-shadow:0 1px 3px rgba(43,36,34,0.08), 0 20px 45px -22px rgba(103,0,16,0.28); border-top:4px solid var(--amber-bold); position:relative;}
+  section.block{max-width:900px; margin:0 auto; background:var(--amber-3); border-radius:var(--raio-card); padding:38px 42px; box-shadow:var(--sombra-card); border-top:4px solid var(--amber-bold); position:relative;}
   section.block .card{box-shadow:none; padding:0; margin:0; border-radius:0;}
 
   /* respiro entre blocos consecutivos da lição, pra cada um ler como uma ilha separada */
@@ -123,20 +139,20 @@ try{ var temaSalvo = sessionStorage.getItem('aluno-tema'); if(temaSalvo) documen
   .kicker{font-family:var(--font-label); font-weight:700; font-size:11.5px; letter-spacing:0.12em; text-transform:uppercase; color:var(--ink-amber); margin-bottom:10px;}
   h2{font-family:var(--font-display); font-weight:800; font-size:28px; margin:0 0 6px 0; color:var(--charcoal);}
   h3{font-family:var(--font-display); font-weight:700; font-size:17px; margin:0 0 12px 0;}
-  .tagline{font-style:italic; color:#6b7178; font-size:15px; margin-bottom:28px;}
+  .tagline{font-style:italic; color:var(--cinza-texto); font-size:15px; margin-bottom:28px;}
   p{margin:0 0 16px 0;}
-  img{max-width:100%; height:auto; display:block; margin:18px auto; border-radius:8px;}
-  .transcript{font-family:var(--font-body); font-size:14px; background:var(--amber-2); border-left:3px solid var(--amber-bold); padding:14px 18px; margin:18px 0; color:#33383e; white-space:pre-wrap; border-radius:0 8px 8px 0;}
-  .transcript .pause{color:#8b929a;} .transcript .flag{color:var(--ink-amber); font-weight:700;}
-  .prompt-block{background:var(--amber-2); border:1px solid var(--line); border-radius:10px; padding:22px 24px; margin:22px 0;}
-  .example-block{background:var(--amber-1); border-left:3px solid var(--amber-bold); padding:12px 16px; margin:14px 0 20px 0; font-size:14.5px; border-radius:0 8px 8px 0;}
+  img{max-width:100%; height:auto; display:block; margin:18px auto; border-radius:var(--raio-campo);}
+  .transcript{font-family:var(--font-body); font-size:14px; background:var(--amber-2); border-left:3px solid var(--amber-bold); padding:14px 18px; margin:18px 0; color:var(--cinza-escuro); white-space:pre-wrap; border-radius:0 var(--raio-campo) var(--raio-campo) 0;}
+  .transcript .pause{color:var(--cinza-pausa);} .transcript .flag{color:var(--ink-amber); font-weight:700;}
+  .prompt-block{background:var(--amber-2); border:1px solid var(--line); border-radius:var(--raio-painel); padding:22px 24px; margin:22px 0;}
+  .example-block{background:var(--amber-1); border-left:3px solid var(--amber-bold); padding:12px 16px; margin:14px 0 20px 0; font-size:14.5px; border-radius:0 var(--raio-campo) var(--raio-campo) 0;}
   .example-block .lbl{font-family:var(--font-label); font-weight:700; font-size:10.5px; letter-spacing:0.08em; text-transform:uppercase; color:var(--ink-amber); display:block; margin-bottom:4px;}
   .sentence-pair{display:flex; flex-direction:column; gap:6px; margin:14px 0;}
   .sentence-pair .a, .sentence-pair .b, .sentence-pair .wrong, .sentence-pair .right{font-family:var(--font-display); font-weight:700; font-size:17px; padding:2px 0;} .sentence-pair .b, .sentence-pair .right{color:var(--ink-amber);}
-  textarea{width:100%; font-family:var(--font-body); font-size:14.5px; padding:10px 12px; border:1px solid var(--line); border-radius:8px; background:#fff; resize:vertical; min-height:44px; color:var(--charcoal);}
+  textarea{width:100%; font-family:var(--font-body); font-size:14.5px; padding:10px 12px; border:1px solid var(--line); border-radius:var(--raio-campo); background:var(--superficie); resize:vertical; min-height:44px; color:var(--charcoal);}
   textarea:focus{outline:none; border-color:var(--amber-bold);}
   .qtext{font-weight:700; font-size:15px; margin-bottom:8px;}
-  .whiteboard-tag{display:inline-block; font-family:var(--font-label); font-weight:700; font-size:11px; letter-spacing:0.06em; text-transform:uppercase; background:var(--charcoal); color:var(--amber-1); padding:3px 9px; border-radius:6px; margin-bottom:14px;}
+  .whiteboard-tag{display:inline-block; font-family:var(--font-label); font-weight:700; font-size:11px; letter-spacing:0.06em; text-transform:uppercase; background:var(--charcoal); color:var(--amber-1); padding:3px 9px; border-radius:var(--raio-etiqueta); margin-bottom:14px;}
 
   /* ---- Texto livre: caixa de texto avulsa (bloco só com textarea) ganha toque de "caderno".
      :not(.session-closing) porque a pergunta de fechamento também tem textarea direta, mas
@@ -148,9 +164,9 @@ try{ var temaSalvo = sessionStorage.getItem('aluno-tema'); if(temaSalvo) documen
   table.map-table th, table.map-table td, .map-table th, .map-table td{border:1px solid var(--line); padding:10px 12px; text-align:left;}
   table.map-table th, .map-table th{background:var(--amber-2); font-family:var(--font-label); font-weight:700; font-size:11.5px; text-transform:uppercase; letter-spacing:0.05em;}
   .word-list{display:flex; flex-wrap:wrap; gap:10px; margin:18px 0;}
-  .word-chip{font-family:var(--font-display); font-weight:700; font-size:16px; background:#fff; border:1px solid var(--line); border-radius:20px; padding:6px 16px;} .word-chip strong{color:var(--ink-amber);}
+  .word-chip{font-family:var(--font-display); font-weight:700; font-size:16px; background:var(--superficie); border:1px solid var(--line); border-radius:var(--raio-pilula); padding:6px 16px;} .word-chip strong{color:var(--ink-amber);}
   .drill-lines{font-family:var(--font-display); font-weight:600; font-size:18px; line-height:2; margin:18px 0;} .drill-lines strong{color:var(--ink-amber);}
-  .reveal-btn{font-family:var(--font-label); font-weight:700; font-size:12px; letter-spacing:0.06em; text-transform:uppercase; background:none; border:1px solid var(--amber-bold); color:var(--ink-amber); padding:8px 16px; border-radius:20px; cursor:pointer; margin-top:8px;}
+  .reveal-btn{font-family:var(--font-label); font-weight:700; font-size:12px; letter-spacing:0.06em; text-transform:uppercase; background:none; border:1px solid var(--amber-bold); color:var(--ink-amber); padding:8px 16px; border-radius:var(--raio-pilula); cursor:pointer; margin-top:8px;}
   .reveal-btn:hover{background:var(--amber-bold); color:var(--charcoal);}
   .reveal-content{display:none; margin-top:16px; padding-top:16px; border-top:1px dashed var(--line); font-size:14.5px;}
   .reveal-content.open{display:block;} .reveal-content p{margin:0 0 10px 0;}
@@ -158,17 +174,17 @@ try{ var temaSalvo = sessionStorage.getItem('aluno-tema'); if(temaSalvo) documen
   /* ---- Exercícios: arrastar e soltar (match up / complete the sentence / unjumble / sorting) ---- */
   section.block:has(.dnd-exercise){border-top-style:dashed;}
   .dnd-exercise{margin:22px 0;}
-  .dnd-hint{font-style:italic; color:#6b7178; font-size:13px; margin:2px 0 10px 0;}
-  .dnd-bank{display:flex; flex-wrap:wrap; gap:10px; margin:14px 0 20px 0; padding:16px; background:var(--amber-2); border:2px dashed var(--line); border-radius:12px; min-height:20px; box-shadow:inset 0 2px 8px rgba(0,0,0,0.07);}
-  .dnd-piece{font-family:var(--font-display); font-weight:700; font-size:16px; background:#fff; border:1px solid var(--line); border-radius:20px; padding:6px 16px; cursor:grab; touch-action:none; user-select:none; -webkit-user-select:none; -webkit-touch-callout:none; box-shadow:0 3px 8px -4px rgba(0,0,0,0.3);}
+  .dnd-hint{font-style:italic; color:var(--cinza-texto); font-size:13px; margin:2px 0 10px 0;}
+  .dnd-bank{display:flex; flex-wrap:wrap; gap:10px; margin:14px 0 20px 0; padding:16px; background:var(--amber-2); border:2px dashed var(--line); border-radius:var(--raio-caixa); min-height:20px; box-shadow:inset 0 2px 8px rgba(0,0,0,0.07);}
+  .dnd-piece{font-family:var(--font-display); font-weight:700; font-size:16px; background:var(--superficie); border:1px solid var(--line); border-radius:var(--raio-pilula); padding:6px 16px; cursor:grab; touch-action:none; user-select:none; -webkit-user-select:none; -webkit-touch-callout:none; box-shadow:0 3px 8px -4px rgba(0,0,0,0.3);}
   .dnd-piece:active{cursor:grabbing;}
   .dnd-piece.dragging{box-shadow:0 12px 30px -10px rgba(0,0,0,0.45); z-index:200;}
   @keyframes encaixe-pulso{ 0%{transform:scale(1);} 40%{transform:scale(1.1);} 100%{transform:scale(1);} }
   .dnd-piece.encaixou{animation:encaixe-pulso .3s ease;}
   @media (prefers-reduced-motion: reduce){ .dnd-piece.encaixou{animation:none;} }
   .dnd-piece-placeholder{display:inline-block; visibility:hidden;}
-  .dnd-target{display:inline-flex; align-items:center; justify-content:center; min-width:90px; min-height:34px; padding:4px 12px; margin:0 2px; border:2px dashed var(--line); border-radius:20px; background:var(--amber-2); vertical-align:middle;}
-  .dnd-target.filled{border-style:solid; border-color:var(--amber-bold); background:#fff; padding:2px 4px;}
+  .dnd-target{display:inline-flex; align-items:center; justify-content:center; min-width:90px; min-height:34px; padding:4px 12px; margin:0 2px; border:2px dashed var(--line); border-radius:var(--raio-pilula); background:var(--amber-2); vertical-align:middle;}
+  .dnd-target.filled{border-style:solid; border-color:var(--amber-bold); background:var(--superficie); padding:2px 4px;}
   .dnd-target.drag-over{border-color:var(--ink-amber); background:var(--amber-1);}
   .dnd-row{display:flex; align-items:center; gap:12px; margin:8px 0;}
   .dnd-label{font-family:var(--font-display); font-weight:700; font-size:16px; min-width:110px;}
@@ -176,15 +192,15 @@ try{ var temaSalvo = sessionStorage.getItem('aluno-tema'); if(temaSalvo) documen
 
   /* ---- Sorting: variação do drag-and-drop, colunas (aceitam várias peças) em vez de alvo único ---- */
   .dnd-columns{display:flex; gap:16px; flex-wrap:wrap; margin-top:4px;}
-  .dnd-column{flex:1 1 160px; min-height:130px; background:var(--amber-2); border:2px dashed var(--line); border-radius:12px; padding:14px; display:flex; flex-direction:column; align-items:flex-start; gap:8px; box-shadow:inset 0 2px 8px rgba(0,0,0,0.07);}
+  .dnd-column{flex:1 1 160px; min-height:130px; background:var(--amber-2); border:2px dashed var(--line); border-radius:var(--raio-caixa); padding:14px; display:flex; flex-direction:column; align-items:flex-start; gap:8px; box-shadow:inset 0 2px 8px rgba(0,0,0,0.07);}
   .dnd-column.drag-over{border-color:var(--ink-amber); background:var(--amber-1);}
   .dnd-column-label{font-family:var(--font-label); font-weight:700; font-size:11px; letter-spacing:0.08em; text-transform:uppercase; color:var(--ink-amber); margin-bottom:2px;}
 
   /* ---- Exercício: quiz (clique/seleção, sem drag) ---- */
   section.block:has(.quiz-exercise){border-top-color:var(--charcoal);}
   .quiz-exercise{margin:22px 0; display:flex; flex-direction:column; gap:12px;}
-  .quiz-option{display:flex; align-items:center; gap:12px; font-family:var(--font-body); font-weight:600; font-size:15px; background:var(--amber-3); border:2px solid var(--line); border-radius:14px; padding:14px 20px; margin:0; cursor:pointer; transition:border-color .15s ease, background .15s ease;}
-  .quiz-option::before{content:''; flex:0 0 auto; width:16px; height:16px; border-radius:50%; border:2px solid var(--line); background:#fff;}
+  .quiz-option{display:flex; align-items:center; gap:12px; font-family:var(--font-body); font-weight:600; font-size:15px; background:var(--amber-3); border:2px solid var(--line); border-radius:var(--raio-opcao); padding:14px 20px; margin:0; cursor:pointer; transition:border-color .15s ease, background .15s ease;}
+  .quiz-option::before{content:''; flex:0 0 auto; width:16px; height:16px; border-radius:50%; border:2px solid var(--line); background:var(--superficie);}
   .quiz-option:hover{border-color:var(--amber-bold);}
   .quiz-option.selected{border-color:var(--charcoal); background:var(--amber-1); font-weight:700;}
   .quiz-option.selected::before{border-color:var(--charcoal); background:var(--charcoal); box-shadow:inset 0 0 0 3px var(--amber-1);}
@@ -192,10 +208,10 @@ try{ var temaSalvo = sessionStorage.getItem('aluno-tema'); if(temaSalvo) documen
   /* ---- Gabarito automático: botão "Check answers" (mesmo visual do .reveal-btn, classe
      separada pra não entrar no seletor que liga o flip do flashcard) + marcação certo/errado
      + link pequeno "see correct answer" nos itens errados. ---- */
-  .gabarito-btn{font-family:var(--font-label); font-weight:700; font-size:12px; letter-spacing:0.06em; text-transform:uppercase; background:none; border:1px solid var(--amber-bold); color:var(--ink-amber); padding:8px 16px; border-radius:20px; cursor:pointer; margin-top:14px; display:block;}
+  .gabarito-btn{font-family:var(--font-label); font-weight:700; font-size:12px; letter-spacing:0.06em; text-transform:uppercase; background:none; border:1px solid var(--amber-bold); color:var(--ink-amber); padding:8px 16px; border-radius:var(--raio-pilula); cursor:pointer; margin-top:14px; display:block;}
   .gabarito-btn:hover{background:var(--amber-bold); color:var(--charcoal);}
-  .dnd-target.gabarito-certo, .dnd-piece.gabarito-certo, .quiz-option.gabarito-certo{border-color:#3f7d4a !important; background:#eaf3ec !important;}
-  .dnd-target.gabarito-errado, .dnd-piece.gabarito-errado, .quiz-option.gabarito-errado{border-color:var(--danger) !important; background:#fbebea !important;}
+  .dnd-target.gabarito-certo, .dnd-piece.gabarito-certo, .quiz-option.gabarito-certo{border-color:var(--certo-borda) !important; background:var(--certo-fundo) !important;}
+  .dnd-target.gabarito-errado, .dnd-piece.gabarito-errado, .quiz-option.gabarito-errado{border-color:var(--danger) !important; background:var(--errado-fundo) !important;}
   .gabarito-wrap{display:inline-block; margin:2px 6px;}
   .gabarito-link{font-family:var(--font-label); font-size:11.5px; font-weight:600; color:var(--ink-amber); text-decoration:underline; text-underline-offset:2px; cursor:pointer; background:none; border:none; padding:0;}
   .gabarito-link:hover{color:var(--amber-bold);}
@@ -203,8 +219,8 @@ try{ var temaSalvo = sessionStorage.getItem('aluno-tema'); if(temaSalvo) documen
 
   /* ---- Exercício: flashcard (casca visual sobre reveal-btn/reveal-content já existente) ---- */
   section.block:has(.flashcard){background:transparent; box-shadow:none; border-top:none; padding:0;}
-  .flashcard{background:#fff; border:1px solid var(--line); border-radius:16px; padding:32px 28px; margin:18px auto; text-align:center; max-width:400px; position:relative; box-shadow:0 18px 34px -18px rgba(0,0,0,0.45);}
-  .flashcard::before, .flashcard::after{content:''; position:absolute; inset:0; border-radius:16px; background:#fff; border:1px solid var(--line); z-index:-1;}
+  .flashcard{background:var(--superficie); border:1px solid var(--line); border-radius:var(--raio-carta); padding:32px 28px; margin:18px auto; text-align:center; max-width:400px; position:relative; box-shadow:0 18px 34px -18px rgba(0,0,0,0.45);}
+  .flashcard::before, .flashcard::after{content:''; position:absolute; inset:0; border-radius:var(--raio-carta); background:var(--superficie); border:1px solid var(--line); z-index:-1;}
   .flashcard::before{transform:rotate(-3deg) translateY(3px);}
   .flashcard::after{transform:rotate(2.5deg) translateY(5px); opacity:.75;}
   .flashcard-front{font-family:var(--font-display); font-weight:800; font-size:24px; color:var(--charcoal);}
@@ -213,7 +229,7 @@ try{ var temaSalvo = sessionStorage.getItem('aluno-tema'); if(temaSalvo) documen
 
   /* ---- Baralho de flashcards: cards consecutivos viram um baralho navegável (Prev/Next),
      e ganham a pergunta de reflexão padrão logo abaixo, na mesma "capa" ---- */
-  .flashcard-group{max-width:900px; margin:0 auto; background:var(--amber-2); border-radius:20px; padding:30px 26px 26px 26px; box-shadow:0 20px 50px -28px rgba(0,0,0,0.5);}
+  .flashcard-group{max-width:900px; margin:0 auto; background:var(--amber-2); border-radius:var(--raio-card); padding:30px 26px 26px 26px; box-shadow:0 20px 50px -28px rgba(0,0,0,0.5);}
   .flashcard-group .flashcard-deck{margin-bottom:0;}
   .flashcard-group .flash-reflect{background:transparent; box-shadow:none; border:none; border-radius:0; border-top:1px dashed var(--line); padding:22px 4px 0 4px; margin-top:22px;}
   .flashcard-deck{display:flex; flex-direction:column; align-items:center; gap:14px;}
@@ -226,7 +242,7 @@ try{ var temaSalvo = sessionStorage.getItem('aluno-tema'); if(temaSalvo) documen
     .deck-stage > section.block:not(.deck-hidden),
     .deck-stage > .card:not(.deck-hidden){animation:none;}
   }
-  .deck-nav-btn{flex:0 0 auto; width:42px; height:42px; border-radius:50%; border:1px solid var(--line); background:#fff; color:var(--ink-amber); font-size:17px; line-height:1; cursor:pointer; display:flex; align-items:center; justify-content:center; box-shadow:0 10px 20px -12px rgba(0,0,0,0.45); transition:border-color .15s ease, background .15s ease, color .15s ease;}
+  .deck-nav-btn{flex:0 0 auto; width:42px; height:42px; border-radius:50%; border:1px solid var(--line); background:var(--superficie); color:var(--ink-amber); font-size:17px; line-height:1; cursor:pointer; display:flex; align-items:center; justify-content:center; box-shadow:0 10px 20px -12px rgba(0,0,0,0.45); transition:border-color .15s ease, background .15s ease, color .15s ease;}
   .deck-nav-btn:hover:not(:disabled){border-color:var(--amber-bold);}
   .deck-nav-btn:disabled{opacity:.3; cursor:default; box-shadow:none;}
   .deck-nav-btn.restart{background:var(--amber-bold); border-color:var(--amber-bold); color:var(--charcoal);}
@@ -239,9 +255,9 @@ try{ var temaSalvo = sessionStorage.getItem('aluno-tema'); if(temaSalvo) documen
   .reading-passage p:last-child{margin-bottom:0;}
 
   /* ---- Link/embed: vídeo (iframe que o professor cola) ou artigo externo (card, abre em nova aba) ---- */
-  .embed-video{position:relative; width:100%; aspect-ratio:16/9; border-radius:12px; overflow:hidden; background:#000; margin:6px 0 0 0;}
+  .embed-video{position:relative; width:100%; aspect-ratio:16/9; border-radius:var(--raio-caixa); overflow:hidden; background:var(--fundo-video); margin:6px 0 0 0;}
   .embed-video iframe{position:absolute; inset:0; width:100%; height:100%; border:0;}
-  .link-card{display:flex; flex-direction:column; gap:4px; background:#fff; border:1px solid var(--line); border-radius:12px; padding:16px 20px; text-decoration:none; color:var(--charcoal); margin-top:6px; box-shadow:0 3px 8px -4px rgba(0,0,0,0.15); transition:border-color .15s ease, box-shadow .15s ease;}
+  .link-card{display:flex; flex-direction:column; gap:4px; background:var(--superficie); border:1px solid var(--line); border-radius:var(--raio-caixa); padding:16px 20px; text-decoration:none; color:var(--charcoal); margin-top:6px; box-shadow:0 3px 8px -4px rgba(0,0,0,0.15); transition:border-color .15s ease, box-shadow .15s ease;}
   .link-card:hover{border-color:var(--amber-bold); box-shadow:0 10px 20px -12px rgba(0,0,0,0.3);}
   .link-card-label{font-family:var(--font-label); font-weight:700; font-size:10.5px; letter-spacing:0.08em; text-transform:uppercase; color:var(--ink-amber);}
   .link-card-title{font-family:var(--font-display); font-weight:700; font-size:16px;}
@@ -254,23 +270,23 @@ try{ var temaSalvo = sessionStorage.getItem('aluno-tema'); if(temaSalvo) documen
 
   .progresso{max-width:320px; margin:0 auto 20px auto; padding:0 24px;}
   .progresso-texto{font-family:var(--font-label); font-weight:700; font-size:11px; letter-spacing:0.1em; text-transform:uppercase; color:var(--amber-bold); text-align:center; margin-bottom:8px;}
-  .progresso-barra{background:rgba(240,214,209,0.18); border-radius:20px; height:8px; overflow:hidden;}
-  .progresso-preenchido{background:var(--amber-bold); height:100%; border-radius:20px; transition:width .4s ease;}
+  .progresso-barra{background:var(--progresso-trilha); border-radius:var(--raio-pilula); height:8px; overflow:hidden;}
+  .progresso-preenchido{background:var(--amber-bold); height:100%; border-radius:var(--raio-pilula); transition:width .4s ease;}
   .lembrete-pendentes{max-width:900px; margin:0 auto 16px auto; padding:0 24px; text-align:center; font-family:var(--font-body); font-size:13.5px; font-style:italic; color:var(--muted);}
   .lembrete-pendentes button{background:none; border:none; padding:0; margin-left:4px; font:inherit; font-style:normal; font-weight:600; color:var(--amber-bold); cursor:pointer; text-decoration:underline; text-underline-offset:2px;}
   .lembrete-pendentes button:hover{color:var(--ink-amber);}
   .boas-vindas{max-width:900px; margin:0 auto 28px auto; padding:0 24px;}
-  .boas-vindas-card{background:var(--amber-1); border:1px solid var(--amber-bold); border-radius:16px; padding:20px 26px; text-align:center; font-family:var(--font-display); font-style:italic; font-weight:600; font-size:17px; color:var(--ink-amber); box-shadow:0 1px 3px rgba(43,36,34,0.08), 0 20px 45px -22px rgba(103,0,16,0.28);}
+  .boas-vindas-card{background:var(--amber-1); border:1px solid var(--amber-bold); border-radius:var(--raio-carta); padding:20px 26px; text-align:center; font-family:var(--font-display); font-style:italic; font-weight:600; font-size:17px; color:var(--ink-amber); box-shadow:var(--sombra-card);}
   .acervo{max-width:900px; margin:0 auto 8px auto; padding:0 24px;}
-  .acervo-toggle{font-family:var(--font-label); font-weight:700; font-size:11.5px; letter-spacing:0.08em; text-transform:uppercase; color:var(--amber-bold); background:none; border:1px solid rgba(91,143,201,0.35); border-radius:20px; padding:7px 16px; cursor:pointer;}
+  .acervo-toggle{font-family:var(--font-label); font-weight:700; font-size:11.5px; letter-spacing:0.08em; text-transform:uppercase; color:var(--amber-bold); background:none; border:1px solid rgba(var(--azul-antigo-rgb),0.35); border-radius:var(--raio-pilula); padding:7px 16px; cursor:pointer;}
   .acervo-toggle:hover{border-color:var(--amber-bold);}
-  .acervo-lista{display:none; margin-top:12px; background:var(--amber-3); border-radius:10px; padding:10px 14px;}
+  .acervo-lista{display:none; margin-top:12px; background:var(--amber-3); border-radius:var(--raio-painel); padding:10px 14px;}
   .acervo-lista.open{display:block;}
   .acervo-item{display:block; padding:8px 6px; font-size:14px; color:var(--charcoal); text-decoration:none; border-bottom:1px solid var(--line); cursor:pointer;}
   .acervo-item:last-child{border-bottom:none;}
   .acervo-item:hover{color:var(--ink-amber);}
   .acervo-item.atual{color:var(--ink-amber); font-weight:700;}
-  .acervo-item .quando{font-family:var(--font-label); font-weight:600; font-size:11px; color:#80868d; margin-left:6px;}
+  .acervo-item .quando{font-family:var(--font-label); font-weight:600; font-size:11px; color:var(--cinza-suave); margin-left:6px;}
   @media(max-width:640px){ .deck-stage{flex-direction:column;} }
   @media(max-width:600px){ .card{padding:26px 22px;} section.block{padding:26px 22px;} section.block:has(.flashcard){padding:0;} header{padding:44px 18px 32px 18px;} }
 </style>
@@ -395,10 +411,10 @@ function render(d){
       <div class="logo">
         <div class="logo-pill">
           <svg class="logo-mark" viewBox="0 0 64 64" role="img" aria-label="Logo">
-            <rect width="64" height="64" rx="16" fill="#670010"/>
-            <rect x="20" y="14" width="9" height="36" rx="2" fill="#fff"/>
-            <rect x="20" y="14" width="28" height="9" rx="2" fill="#fff"/>
-            <rect x="20" y="30" width="22" height="9" rx="2" fill="#fff"/>
+            <rect width="64" height="64" rx="16" style="fill:var(--logo-fundo)"/>
+            <rect x="20" y="14" width="9" height="36" rx="2" style="fill:var(--logo-simbolo)"/>
+            <rect x="20" y="14" width="28" height="9" rx="2" style="fill:var(--logo-simbolo)"/>
+            <rect x="20" y="30" width="22" height="9" rx="2" style="fill:var(--logo-simbolo)"/>
           </svg>
           <div class="logo-nome">${NOME_APP}</div>
         </div>
