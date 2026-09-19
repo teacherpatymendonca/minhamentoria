@@ -26,7 +26,12 @@ try{
     document.head.appendChild(_f);
   }
 }catch(e){}
-try{ var temaSalvo = sessionStorage.getItem('aluno-tema'); if(temaSalvo) document.documentElement.setAttribute('data-theme', temaSalvo); }catch(e){}
+try{
+  var temaSalvo = sessionStorage.getItem('aluno-tema');
+  if(temaSalvo) document.documentElement.setAttribute('data-theme', temaSalvo);
+  // Tema infantil abre no modo claro por padrão (a escolha do aluno, se houver, vale sempre).
+  else if(document.documentElement.getAttribute('data-tema') === 'infantil') document.documentElement.setAttribute('data-theme', 'light');
+}catch(e){}
 </script>
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%23cb4c46'/%3E%3Crect x='20' y='14' width='9' height='36' rx='2' fill='%23fff'/%3E%3Crect x='20' y='14' width='28' height='9' rx='2' fill='%23fff'/%3E%3Crect x='20' y='30' width='22' height='9' rx='2' fill='%23fff'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -340,6 +345,105 @@ try{ var temaSalvo = sessionStorage.getItem('aluno-tema'); if(temaSalvo) documen
   .acervo-item .quando{font-family:var(--font-label); font-weight:600; font-size:11px; color:var(--cinza-suave); margin-left:6px;}
   @media(max-width:640px){ .deck-stage{flex-direction:column;} }
   @media(max-width:600px){ .card{padding:26px 22px;} section.block{padding:26px 22px;} section.block:has(.flashcard){padding:0;} header{padding:44px 18px 32px 18px;} }
+
+  /* ==========================================================================
+     TEMA INFANTIL — personalidade (só vale com data-tema="infantil" na tag <html>).
+     Fica no fim do <style> de propósito: assim ganha das regras padrão de mesma força.
+     ========================================================================== */
+  [data-tema="infantil"]{ --tag-x:42px; --manteiga:#FFC94D; --botao-sombra:#8E2718; --anel:var(--amber-3); }
+  @media(max-width:600px){ [data-tema="infantil"]{ --tag-x:22px; } }
+
+  /* ---- Cada card ganha uma faixa grossa colorida no topo + uma etiqueta (emoji grande + nome do tipo).
+     A cor e o texto da etiqueta vêm de variáveis definidas por tipo de bloco, mais abaixo. ---- */
+  [data-tema="infantil"] section.block{
+    --tipo-cor:var(--amber-bold); --tipo-texto:var(--sobre-destaque); --tipo-emoji:'🎯'; --tipo-nome:'Focus point';
+    border-top:8px solid var(--tipo-cor); padding-top:82px;
+  }
+  [data-tema="infantil"] section.block::before,
+  [data-tema="infantil"] .flashcard-group::before{
+    content:var(--tipo-emoji); position:absolute; top:22px; left:var(--tag-x); z-index:1;
+    display:flex; align-items:center; justify-content:center; width:48px; height:48px; margin:0; border-radius:50%;
+    background:var(--superficie); border:4px solid var(--tipo-cor); box-shadow:0 0 0 4px var(--anel);
+    font-size:25px; line-height:1; letter-spacing:0; text-transform:none;
+  }
+  [data-tema="infantil"] section.block::after,
+  [data-tema="infantil"] .flashcard-group::after{
+    content:var(--tipo-nome); position:absolute; top:31px; left:calc(var(--tag-x) + 32px);
+    display:flex; align-items:center; height:30px; padding:0 18px 0 32px; border-radius:999px;
+    background:var(--tipo-cor); color:var(--tipo-texto);
+    font-family:var(--font-label); font-weight:800; font-size:14px; letter-spacing:0.01em; text-transform:none;
+  }
+
+  /* Tipos de bloco: cada um com sua cor da paleta (coral, ameixa, manteiga), emoji e nome. */
+  [data-tema="infantil"] section.block:has(.dnd-exercise){ --tipo-cor:var(--charcoal); --tipo-texto:var(--superficie); --tipo-emoji:'🧩'; --tipo-nome:'Drag & drop'; }
+  [data-tema="infantil"] section.block:has(.quiz-exercise){ --tipo-cor:var(--manteiga); --tipo-texto:var(--charcoal); --tipo-emoji:'⭐'; --tipo-nome:'Quiz'; }
+  [data-tema="infantil"] section.block:has(.reading-passage){ --tipo-cor:var(--charcoal); --tipo-texto:var(--superficie); --tipo-emoji:'📖'; --tipo-nome:'Reading'; border-left:0; }
+  [data-tema="infantil"] section.block:has(> textarea){ --tipo-emoji:'✏️'; --tipo-nome:'Your turn'; }
+  [data-tema="infantil"] section.block:has(.embed-video){ --tipo-emoji:'🎬'; --tipo-nome:'Watch'; }
+  [data-tema="infantil"] section.block:has(.link-card){ --tipo-cor:var(--manteiga); --tipo-texto:var(--charcoal); --tipo-emoji:'🔗'; --tipo-nome:'Explore'; }
+  [data-tema="infantil"] section.block:has(> textarea):not(.session-closing) .qtext::before{ content:none; }
+  /* Baralho de flashcards: a etiqueta fica no grupo (os cards soltos dentro dele não têm etiqueta). */
+  [data-tema="infantil"] .flashcard-group{
+    --tipo-cor:var(--manteiga); --tipo-texto:var(--charcoal); --tipo-emoji:'🧠'; --tipo-nome:'Flashcards'; --anel:var(--amber-2); --tag-x:26px;
+    position:relative; border-top:8px solid var(--tipo-cor); padding-top:82px;
+  }
+  [data-tema="infantil"] section.block:has(.flashcard){ border-top:0; padding-top:0; }
+  [data-tema="infantil"] section.block:has(.flashcard)::before,
+  [data-tema="infantil"] section.block:has(.flashcard)::after{ content:none; display:none; }
+  [data-tema="infantil"] .flashcard-group section.flash-reflect{ border-top:1px dashed var(--line); padding:22px 4px 0 4px; }
+  [data-tema="infantil"] .flashcard-group section.flash-reflect::before,
+  [data-tema="infantil"] .flashcard-group section.flash-reflect::after{ content:none; display:none; }
+  /* Pergunta de fechamento: já tem o próprio título ("Before you go"), então sem etiqueta. */
+  [data-tema="infantil"] section.block.session-closing{ --tipo-cor:var(--charcoal); padding-top:36px; }
+  [data-tema="infantil"] section.block.session-closing::before,
+  [data-tema="infantil"] section.block.session-closing::after{ content:none; display:none; }
+
+  /* ---- Emojis dos títulos maiores (o JS envolve cada emoji num <span class="emoji-grande">) ---- */
+  [data-tema="infantil"] .emoji-grande{ display:inline-block; font-size:1.45em; line-height:1; vertical-align:-0.1em; margin-right:0.12em; }
+
+  /* ---- Textos mais leves: rótulos pequenos deixam a caixa alta e ficam um pouco maiores ---- */
+  [data-tema="infantil"] .kicker{ font-size:16px; letter-spacing:0.01em; text-transform:none; }
+  [data-tema="infantil"] .example-block .lbl,
+  [data-tema="infantil"] .whiteboard-tag,
+  [data-tema="infantil"] .dnd-column-label,
+  [data-tema="infantil"] .deck-counter,
+  [data-tema="infantil"] .link-card-label,
+  [data-tema="infantil"] .logo-professor,
+  [data-tema="infantil"] .save-indicator{ font-size:13px; letter-spacing:0.02em; text-transform:none; }
+  [data-tema="infantil"] table.map-table th, [data-tema="infantil"] .map-table th{ font-size:13px; letter-spacing:0.01em; text-transform:none; }
+  [data-tema="infantil"] .progresso-texto{ font-size:14px; letter-spacing:0.01em; text-transform:none; }
+  [data-tema="infantil"] .gabarito-link{ font-size:13px; }
+
+  /* ---- Botões "gordinhos": mais altos, com respiro, sombra embaixo que "afunda" ao clicar (bons pro dedo no celular) ---- */
+  [data-tema="infantil"] .finalizar-btn,
+  [data-tema="infantil"] .reveal-btn,
+  [data-tema="infantil"] .gabarito-btn,
+  [data-tema="infantil"] .acervo-toggle{
+    min-height:48px; padding:12px 26px; font-size:15px; font-weight:800; letter-spacing:0.01em; text-transform:none;
+    transition:transform .08s ease, box-shadow .08s ease, background .15s ease, color .15s ease;
+  }
+  [data-tema="infantil"] .finalizar-btn{ min-height:58px; padding:16px 36px; font-size:16px; box-shadow:0 5px 0 var(--botao-sombra); }
+  [data-tema="infantil"] .finalizar-btn:active{ transform:translateY(5px); box-shadow:0 0 0 var(--botao-sombra); }
+  [data-tema="infantil"] .reveal-btn,
+  [data-tema="infantil"] .gabarito-btn{ background:var(--superficie); border:2px solid var(--amber-bold); box-shadow:0 4px 0 var(--amber-bold); }
+  [data-tema="infantil"] .reveal-btn:hover,
+  [data-tema="infantil"] .gabarito-btn:hover{ background:var(--amber-bold); color:var(--sobre-destaque); }
+  [data-tema="infantil"] .reveal-btn:active,
+  [data-tema="infantil"] .gabarito-btn:active{ transform:translateY(4px); box-shadow:0 0 0 var(--amber-bold); }
+  [data-tema="infantil"] .acervo-toggle{ border:2px solid var(--destaque-pagina); box-shadow:0 4px 0 var(--destaque-pagina); }
+  [data-tema="infantil"] .acervo-toggle:active{ transform:translateY(4px); box-shadow:0 0 0 var(--destaque-pagina); }
+  [data-tema="infantil"] .deck-nav-btn{ width:50px; height:50px; font-size:20px; box-shadow:0 4px 0 var(--line); transition:transform .08s ease, box-shadow .08s ease, border-color .15s ease; }
+  [data-tema="infantil"] .deck-nav-btn:active:not(:disabled){ transform:translateY(4px); box-shadow:0 0 0 var(--line); }
+  [data-tema="infantil"] .deck-nav-btn:disabled{ box-shadow:none; }
+  [data-tema="infantil"] .deck-nav-btn.restart{ box-shadow:0 4px 0 var(--botao-sombra); }
+  [data-tema="infantil"] .deck-nav-btn.restart:active{ box-shadow:0 0 0 var(--botao-sombra); }
+  [data-tema="infantil"] .tema-toggle{ width:46px; height:46px; box-shadow:0 4px 0 var(--line); transition:transform .08s ease, box-shadow .08s ease; }
+  [data-tema="infantil"] .tema-toggle svg{ width:22px; height:22px; }
+  [data-tema="infantil"] .tema-toggle:active{ transform:translateY(4px); box-shadow:0 0 0 var(--line); }
+  @media (prefers-reduced-motion: reduce){
+    [data-tema="infantil"] .finalizar-btn, [data-tema="infantil"] .reveal-btn, [data-tema="infantil"] .gabarito-btn,
+    [data-tema="infantil"] .acervo-toggle, [data-tema="infantil"] .deck-nav-btn, [data-tema="infantil"] .tema-toggle{ transition:none; }
+  }
 </style>
 </head>
 <body>
@@ -393,6 +497,15 @@ const TEXTOS = {
   lembretePendentes: (qtd) => qtd === 1 ? '⏳ You have 1 unfinished session.' : `⏳ You have ${qtd} unfinished sessions.`,
   lembreteLink: 'See your sessions',
 };
+// Tema infantil ativo? (definido cedo, no <head>, a partir de ?tema=infantil)
+const INFANTIL = document.documentElement.getAttribute('data-tema') === 'infantil';
+// No tema infantil, alguns textos ficam mais leves e com o vocabulário de "missões".
+if(INFANTIL){
+  Object.assign(TEXTOS, {
+    acervoToggle: (qtd) => `📚 Suas missões (${qtd})`,
+    progresso: (feitas, total) => `${feitas} de ${total} ${total === 1 ? 'missão concluída' : 'missões concluídas'}`,
+  });
+}
 document.title = TEXTOS.tituloPagina;
 document.getElementById('loading').textContent = TEXTOS.carregando;
 document.getElementById('save-indicator').textContent = TEXTOS.salvando;
@@ -403,7 +516,8 @@ const ICONE_SOL = '<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 
 const ICONE_LUA = '<path d="M20 14.5A8.5 8.5 0 0 1 9.5 4 8.5 8.5 0 1 0 20 14.5Z" fill="currentColor" stroke="none"/>';
 
 function temaAtual(){
-  try{ return sessionStorage.getItem(TEMA_STORAGE_KEY) || 'dark'; }catch(e){ return 'dark'; }
+  const padrao = INFANTIL ? 'light' : 'dark';
+  try{ return sessionStorage.getItem(TEMA_STORAGE_KEY) || padrao; }catch(e){ return padrao; }
 }
 
 function aplicarTema(tema){
@@ -510,6 +624,29 @@ function render(d){
   carregarAcervo(d.sessao.id);
   renderFinalizar(d.sessao.finalizada_em);
   mostrarBoasVindas(d.nome);
+  emojisGrandes();
+}
+
+// Só no tema infantil: envolve os emojis dos títulos num <span> pra poderem ficar maiores (o texto não muda).
+function emojisGrandes(){
+  if(!INFANTIL) return;
+  const re = new RegExp('(\\p{Extended_Pictographic}(?:\\uFE0F|\\u200D\\p{Extended_Pictographic}|\\p{Emoji_Modifier})*)', 'gu');
+  document.querySelectorAll('header h1, #conteudo-sessao h2, #conteudo-sessao h3, .kicker, .boas-vindas-card').forEach(el=>{
+    const walker = document.createTreeWalker(el, NodeFilter.SHOW_TEXT);
+    const nos = [];
+    while(walker.nextNode()) nos.push(walker.currentNode);
+    nos.forEach(no=>{
+      if(no.parentElement && no.parentElement.closest('.emoji-grande')) return;
+      const partes = no.nodeValue.split(re);
+      if(partes.length < 2) return;
+      const frag = document.createDocumentFragment();
+      partes.forEach((p, i)=>{
+        if(i % 2 === 1){ const s = document.createElement('span'); s.className = 'emoji-grande'; s.textContent = p; frag.appendChild(s); }
+        else if(p){ frag.appendChild(document.createTextNode(p)); }
+      });
+      no.parentNode.replaceChild(frag, no);
+    });
+  });
 }
 
 // Mensagem de boas-vindas: aparece só na primeira vez que o aluno abre o link dele
