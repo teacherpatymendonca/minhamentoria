@@ -211,7 +211,7 @@ function servirArquivo(res, nome) {
   const caminho = path.join(__dirname, 'public', nome);
   fs.readFile(caminho, (err, dados) => {
     if (err) { res.writeHead(404); res.end('Arquivo nao encontrado: ' + nome); return; }
-    res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
+    res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-cache' });
     res.end(dados);
   });
 }
