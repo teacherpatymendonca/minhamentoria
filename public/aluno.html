@@ -13,19 +13,35 @@
 <meta name="twitter:card" content="summary">
 <script>
 // Aplica o tema salvo (se houver) antes da página desenhar, pra não piscar o tema errado.
-// Tema visual infantil: ativado por ?tema=infantil (atributo data-tema, separado do data-theme claro/escuro).
-// A fonte Nunito só é carregada quando este tema está ativo. ?modo=claro|escuro escolhe o modo (útil pra testar).
+// Visual do app: "clássico" (padrão) ou "divertido" (tema infantil, atributo data-tema="infantil" na tag <html>,
+// separado do data-theme claro/escuro). Prioridade: 1) ?tema=infantil|padrao na URL (e guarda a escolha),
+// 2) escolha guardada neste aparelho (localStorage), 3) clássico. Tudo com try/catch: se o navegador bloquear
+// o armazenamento, o app segue normal, só sem lembrar. A fonte Nunito só é carregada no visual divertido.
+function carregarFonteInfantil(){
+  try{
+    if(document.getElementById('fonte-infantil')) return;
+    var f = document.createElement('link'); f.id = 'fonte-infantil'; f.rel = 'stylesheet';
+    f.href = 'https://fonts.googleapis.com/css2?family=Nunito:ital,wght@0,400..900;1,400..900&display=swap';
+    document.head.appendChild(f);
+  }catch(e){}
+}
+var _visual = null; // 'infantil' | 'padrao' | null
 try{
   var _q = new URLSearchParams(location.search);
-  var _m = _q.get('modo');
-  if(_m === 'claro' || _m === 'escuro') sessionStorage.setItem('aluno-tema', _m === 'claro' ? 'light' : 'dark');
-  if(_q.get('tema') === 'infantil'){
-    document.documentElement.setAttribute('data-tema', 'infantil');
-    var _f = document.createElement('link'); _f.rel = 'stylesheet';
-    _f.href = 'https://fonts.googleapis.com/css2?family=Nunito:ital,wght@0,400..900;1,400..900&display=swap';
-    document.head.appendChild(_f);
+  var _t = _q.get('tema');
+  if(_t === 'infantil' || _t === 'padrao'){
+    _visual = _t;
+    try{ localStorage.setItem('aluno-visual', _t); }catch(e){}
   }
+  // ?modo=claro|escuro escolhe o claro/escuro pela URL (útil pra testar)
+  var _m = _q.get('modo');
+  if(_m === 'claro' || _m === 'escuro'){ try{ sessionStorage.setItem('aluno-tema', _m === 'claro' ? 'light' : 'dark'); }catch(e){} }
 }catch(e){}
+if(!_visual){ try{ var _g = localStorage.getItem('aluno-visual'); if(_g === 'infantil' || _g === 'padrao') _visual = _g; }catch(e){} }
+if(_visual === 'infantil'){
+  document.documentElement.setAttribute('data-tema', 'infantil');
+  carregarFonteInfantil();
+}
 try{
   var temaSalvo = sessionStorage.getItem('aluno-tema');
   if(temaSalvo) document.documentElement.setAttribute('data-theme', temaSalvo);
@@ -147,6 +163,11 @@ try{
   .save-indicator.show{opacity:1;}
   .tema-toggle{position:fixed; top:14px; left:14px; width:36px; height:36px; padding:0; display:flex; align-items:center; justify-content:center; border-radius:50%; border:1px solid var(--line); background:var(--amber-3); color:var(--ink-amber); cursor:pointer; z-index:100;}
   .tema-toggle:hover{border-color:var(--amber-bold);}
+  /* Botão que troca o visual (clássico x divertido): fica ao lado do sol/lua, com área de toque de 44px. */
+  .visual-toggle{position:fixed; top:14px; left:60px; min-height:36px; display:flex; align-items:center; padding:0 14px; border-radius:18px; border:1px solid var(--line); background:var(--amber-3); color:var(--ink-amber); font-family:var(--font-label); font-weight:700; font-size:13px; white-space:nowrap; cursor:pointer; z-index:100;}
+  .visual-toggle::after{content:""; position:absolute; inset:-4px;} /* área de toque de 44px, sem aumentar o botão visível */
+  .visual-toggle:hover{border-color:var(--amber-bold);}
+  .visual-toggle:focus-visible, .tema-toggle:focus-visible{outline:3px solid var(--amber-bold); outline-offset:2px;}
   .tema-toggle svg{width:18px; height:18px;}
   .card{max-width:900px; background:var(--amber-3); border-radius:var(--raio-card); padding:38px 42px; margin:0 auto; box-shadow:var(--sombra-card);}
   /* Blindagem: mesmo sem a div .card, a seção já nasce com o fundo claro. Evita texto invisível se o conteúdo esquecer o wrapper. */
@@ -439,6 +460,9 @@ try{
   [data-tema="infantil"] .deck-nav-btn.restart:active{ box-shadow:0 0 0 var(--botao-sombra); }
   [data-tema="infantil"] .tema-toggle{ width:46px; height:46px; box-shadow:0 4px 0 var(--line); transition:transform .08s ease, box-shadow .08s ease; }
   [data-tema="infantil"] .tema-toggle svg{ width:22px; height:22px; }
+  [data-tema="infantil"] .visual-toggle{ top:14px; left:70px; min-height:46px; padding:0 22px; border-radius:999px; border:2px solid var(--line); font-size:15px; font-weight:800; box-shadow:0 4px 0 var(--line); transition:transform .08s ease, box-shadow .08s ease; }
+  @media(max-width:600px){ [data-tema="infantil"] header{ padding-top:72px; } } /* abre espaço pros botões maiores do topo */
+  [data-tema="infantil"] .visual-toggle:active{ transform:translateY(4px); box-shadow:0 0 0 var(--line); }
   [data-tema="infantil"] .tema-toggle:active{ transform:translateY(4px); box-shadow:0 0 0 var(--line); }
   /* ---- Celebração ao conferir respostas (parte 2) ---- */
   [data-tema="infantil"] .celebra-msg{
@@ -472,6 +496,8 @@ try{
 <button class="tema-toggle" id="tema-toggle" onclick="alternarTema()" aria-label="Alternar modo claro ou escuro" title="Alternar modo claro ou escuro">
   <svg id="icone-tema" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></svg>
 </button>
+
+<button class="visual-toggle" id="visual-toggle" type="button" onclick="alternarVisual()" aria-pressed="false"></button>
 
 <div id="app">
   <div class="msg" id="loading">Carregando...</div>
@@ -517,18 +543,26 @@ const TEXTOS = {
   lembretePendentes: (qtd) => qtd === 1 ? '⏳ You have 1 unfinished session.' : `⏳ You have ${qtd} unfinished sessions.`,
   lembreteLink: 'See your sessions',
 };
-// Tema infantil ativo? (definido cedo, no <head>, a partir de ?tema=infantil)
-const INFANTIL = document.documentElement.getAttribute('data-tema') === 'infantil';
-// No tema infantil, alguns textos ficam mais leves e com o vocabulário de "missões".
-if(INFANTIL){
-  Object.assign(TEXTOS, {
-    acervoToggle: (qtd) => `📚 Suas missões (${qtd})`,
-    progresso: (feitas, total) => `${feitas} de ${total} ${total === 1 ? 'missão concluída' : 'missões concluídas'}`,
-    // Frases da celebração ao conferir respostas (uma é sorteada, sem repetir a anterior).
-    celebraAcerto: ['🎉 Great job!', '🌟 You nailed it!', '🚀 Awesome work!', '🏆 Fantastic!'],
-    celebraQuase: ['Almost there! Try again.', 'So close! Have another go.'],
-  });
-}
+// Visual divertido (tema infantil) ativo agora? Lê o atributo da tag <html>, que muda quando o aluno troca de modo.
+function ehInfantil(){ return document.documentElement.getAttribute('data-tema') === 'infantil'; }
+// No visual divertido, alguns textos ficam mais leves e com o vocabulário de "missões".
+const TEXTOS_CLASSICO = { acervoToggle: TEXTOS.acervoToggle, progresso: TEXTOS.progresso };
+const TEXTOS_DIVERTIDO = {
+  acervoToggle: (qtd) => `📚 Suas missões (${qtd})`,
+  progresso: (feitas, total) => `${feitas} de ${total} ${total === 1 ? 'missão concluída' : 'missões concluídas'}`,
+};
+Object.assign(TEXTOS, {
+  // Botão que troca o visual (o rótulo mostra pra qual modo o aluno vai).
+  visualLigar: '🎨 Modo divertido',
+  visualDesligar: 'Modo clássico',
+  visualAriaLigar: 'Ativar o modo divertido',
+  visualAriaDesligar: 'Voltar ao modo clássico',
+  // Frases da celebração ao conferir respostas (uma é sorteada, sem repetir a anterior).
+  celebraAcerto: ['🎉 Great job!', '🌟 You nailed it!', '🚀 Awesome work!', '🏆 Fantastic!'],
+  celebraQuase: ['Almost there! Try again.', 'So close! Have another go.'],
+});
+function aplicarTextosDoModo(){ Object.assign(TEXTOS, ehInfantil() ? TEXTOS_DIVERTIDO : TEXTOS_CLASSICO); }
+aplicarTextosDoModo();
 document.title = TEXTOS.tituloPagina;
 document.getElementById('loading').textContent = TEXTOS.carregando;
 document.getElementById('save-indicator').textContent = TEXTOS.salvando;
@@ -539,7 +573,8 @@ const ICONE_SOL = '<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 
 const ICONE_LUA = '<path d="M20 14.5A8.5 8.5 0 0 1 9.5 4 8.5 8.5 0 1 0 20 14.5Z" fill="currentColor" stroke="none"/>';
 
 function temaAtual(){
-  const padrao = INFANTIL ? 'light' : 'dark';
+  // Sem escolha explícita de sol/lua: o visual divertido abre no claro; o clássico, no escuro (como sempre).
+  const padrao = ehInfantil() ? 'light' : 'dark';
   try{ return sessionStorage.getItem(TEMA_STORAGE_KEY) || padrao; }catch(e){ return padrao; }
 }
 
@@ -556,6 +591,41 @@ function alternarTema(){
 }
 
 aplicarTema(temaAtual());
+
+// ---- Visual clássico x divertido: o aluno escolhe pelo botão; a escolha fica neste aparelho (localStorage). ----
+// Troca no meio da sessão só muda o atributo data-tema e uns pequenos ajustes — nada é recriado, então as
+// respostas já marcadas (arrastar, quiz, textos, gabarito, flashcards) ficam exatamente como estão.
+function atualizarBotaoVisual(){
+  const b = document.getElementById('visual-toggle');
+  if(!b) return;
+  const on = ehInfantil();
+  b.textContent = on ? TEXTOS.visualDesligar : TEXTOS.visualLigar;
+  b.setAttribute('aria-pressed', on ? 'true' : 'false');
+  const rotulo = on ? TEXTOS.visualAriaDesligar : TEXTOS.visualAriaLigar;
+  b.setAttribute('aria-label', rotulo);
+  b.title = rotulo;
+}
+
+function aplicarVisual(visual){
+  const html = document.documentElement;
+  if(visual === 'infantil'){ html.setAttribute('data-tema', 'infantil'); carregarFonteInfantil(); }
+  else { html.removeAttribute('data-tema'); }
+  try{ localStorage.setItem('aluno-visual', visual); }catch(e){}
+  // Atualiza o ?tema= da URL, senão ao recarregar o valor antigo da URL (que tem prioridade) desfaria a troca.
+  try{ const u = new URL(location.href); u.searchParams.set('tema', visual); history.replaceState(history.state, '', u); }catch(e){}
+  aplicarTextosDoModo();
+  aplicarTema(temaAtual());
+  if(visual === 'infantil') emojisGrandes(); else { desfazerEmojisGrandes(); limparCelebracoes(); }
+  if(sessoesCache){
+    renderProgresso(sessoesCache);
+    const bAcervo = document.querySelector('.acervo-toggle');
+    if(bAcervo) bAcervo.textContent = TEXTOS.acervoToggle(sessoesCache.length);
+  }
+  atualizarBotaoVisual();
+}
+
+function alternarVisual(){ aplicarVisual(ehInfantil() ? 'padrao' : 'infantil'); }
+atualizarBotaoVisual();
 
 const params = new URLSearchParams(location.search);
 const codigo = params.get('codigo');
@@ -650,9 +720,23 @@ function render(d){
   emojisGrandes();
 }
 
+// Ao voltar pro clássico: tira os <span> dos emojis, deixando os títulos como eram (só texto).
+function desfazerEmojisGrandes(){
+  document.querySelectorAll('.emoji-grande').forEach(s=>{
+    const pai = s.parentNode;
+    s.replaceWith(document.createTextNode(s.textContent));
+    if(pai) pai.normalize();
+  });
+}
+
+// Ao voltar pro clássico: some com qualquer mensagem/confete de celebração que ainda esteja na tela.
+function limparCelebracoes(){
+  document.querySelectorAll('.celebra-camada, .celebra-msg').forEach(el=> el.remove());
+}
+
 // Só no tema infantil: envolve os emojis dos títulos num <span> pra poderem ficar maiores (o texto não muda).
 function emojisGrandes(){
-  if(!INFANTIL) return;
+  if(!ehInfantil()) return;
   const re = new RegExp('(\\p{Extended_Pictographic}(?:\\uFE0F|\\u200D\\p{Extended_Pictographic}|\\p{Emoji_Modifier})*)', 'gu');
   document.querySelectorAll('header h1, #conteudo-sessao h2, #conteudo-sessao h3, .kicker, .boas-vindas-card').forEach(el=>{
     const walker = document.createTreeWalker(el, NodeFilter.SHOW_TEXT);
@@ -717,11 +801,13 @@ function renderProgresso(sessoes){
   `;
 }
 
+let sessoesCache = null; // lista de sessões já carregada (pra atualizar os textos ao trocar de visual, sem nova consulta)
 async function carregarAcervo(sessaoAtualId){
   try{
     const r = await fetch('/api/sessoes-aluno?codigo=' + encodeURIComponent(codigo));
     const d = await r.json();
     if(!d.sessoes) return;
+    sessoesCache = d.sessoes;
 
     renderProgresso(d.sessoes);
     renderLembretePendentes(d.sessoes, sessaoAtualId);
@@ -1048,7 +1134,7 @@ function initGabarito(){
     btn.textContent = TEXTOS.gabaritoBotao;
     btn.addEventListener('click', ()=>{
       conferirRespostas(container);
-      if(INFANTIL){ try{ celebrarResultado(container, btn); }catch(e){} }
+      if(ehInfantil()){ try{ celebrarResultado(container, btn); }catch(e){} }
     });
     container.insertAdjacentElement('afterend', btn);
   });
