@@ -440,6 +440,26 @@ try{
   [data-tema="infantil"] .tema-toggle{ width:46px; height:46px; box-shadow:0 4px 0 var(--line); transition:transform .08s ease, box-shadow .08s ease; }
   [data-tema="infantil"] .tema-toggle svg{ width:22px; height:22px; }
   [data-tema="infantil"] .tema-toggle:active{ transform:translateY(4px); box-shadow:0 0 0 var(--line); }
+  /* ---- Celebração ao conferir respostas (parte 2) ---- */
+  [data-tema="infantil"] .celebra-msg{
+    display:block; width:fit-content; max-width:100%; margin:14px 0 0 0; padding:10px 20px; border-radius:999px;
+    font-family:var(--font-label); font-weight:800; font-size:16px; line-height:1.3;
+    animation:celebra-msg-vida 4.5s ease both;
+  }
+  [data-tema="infantil"] .celebra-acerto{ background:var(--manteiga); color:var(--charcoal); }
+  [data-tema="infantil"] .celebra-quase{ background:var(--amber-2); color:var(--charcoal); border:2px solid var(--line); }
+  @keyframes celebra-msg-vida{ 0%{opacity:0; transform:translateY(6px) scale(.96);} 8%{opacity:1; transform:none;} 88%{opacity:1;} 100%{opacity:0;} }
+  .celebra-camada{ position:fixed; width:0; height:0; z-index:300; pointer-events:none; }
+  .celebra-peca{ position:absolute; left:0; top:0; width:var(--tam); height:var(--tam); margin:calc(var(--tam) / -2) 0 0 calc(var(--tam) / -2); background:var(--cor); opacity:0; pointer-events:none; animation:celebra-voa var(--dur) var(--atraso) cubic-bezier(.2,.7,.3,1) both; }
+  .celebra-estrela{ clip-path:polygon(50% 0%,61% 35%,98% 35%,68% 57%,79% 91%,50% 70%,21% 91%,32% 57%,2% 35%,39% 35%); }
+  .celebra-tira{ width:calc(var(--tam) * .7); height:var(--tam); border-radius:2px; }
+  @keyframes celebra-voa{
+    0%{ opacity:0; transform:translate(0,0) rotate(0) scale(.3); }
+    12%{ opacity:1; }
+    65%{ opacity:1; transform:translate(var(--dx), var(--dy)) rotate(var(--rot)) scale(1); }
+    100%{ opacity:0; transform:translate(calc(var(--dx) * 1.15), calc(var(--dy) + 60px)) rotate(calc(var(--rot) * 1.3)) scale(.8); }
+  }
+  @media (prefers-reduced-motion: reduce){ [data-tema="infantil"] .celebra-msg{ animation:none; } .celebra-camada{ display:none; } }
   @media (prefers-reduced-motion: reduce){
     [data-tema="infantil"] .finalizar-btn, [data-tema="infantil"] .reveal-btn, [data-tema="infantil"] .gabarito-btn,
     [data-tema="infantil"] .acervo-toggle, [data-tema="infantil"] .deck-nav-btn, [data-tema="infantil"] .tema-toggle{ transition:none; }
@@ -504,6 +524,9 @@ if(INFANTIL){
   Object.assign(TEXTOS, {
     acervoToggle: (qtd) => `📚 Suas missões (${qtd})`,
     progresso: (feitas, total) => `${feitas} de ${total} ${total === 1 ? 'missão concluída' : 'missões concluídas'}`,
+    // Frases da celebração ao conferir respostas (uma é sorteada, sem repetir a anterior).
+    celebraAcerto: ['🎉 Great job!', '🌟 You nailed it!', '🚀 Awesome work!', '🏆 Fantastic!'],
+    celebraQuase: ['Almost there! Try again.', 'So close! Have another go.'],
   });
 }
 document.title = TEXTOS.tituloPagina;
@@ -1023,7 +1046,10 @@ function initGabarito(){
     btn.type = 'button';
     btn.className = 'gabarito-btn';
     btn.textContent = TEXTOS.gabaritoBotao;
-    btn.addEventListener('click', ()=> conferirRespostas(container));
+    btn.addEventListener('click', ()=>{
+      conferirRespostas(container);
+      if(INFANTIL){ try{ celebrarResultado(container, btn); }catch(e){} }
+    });
     container.insertAdjacentElement('afterend', btn);
   });
 }
@@ -1107,6 +1133,82 @@ function conferirQuiz(container){
   } else {
     inserirLinkGabarito(container.lastElementChild, opcaoCerta.textContent);
   }
+}
+
+/* ---- Tema infantil: celebração depois do "Check answers". Só LÊ o resultado que o gabarito acabou de
+   marcar (.gabarito-certo / .gabarito-errado) — não muda a lógica do gabarito nem as respostas salvas.
+   Sem som e sem biblioteca: são só <span> animados por CSS, numa camada que não recebe cliques. ---- */
+const celebracaoUltima = new WeakMap();   // container -> assinatura da última conferência
+const celebracaoMensagem = new WeakMap(); // container -> { el, timer } da mensagem na tela
+let celebracaoFraseAnterior = -1;
+
+// "Foto" das respostas do exercício: onde está cada peça / qual opção está marcada.
+function assinaturaRespostas(container){
+  const partes = [];
+  container.querySelectorAll('.dnd-piece').forEach(p=>{
+    const pai = p.parentElement;
+    partes.push((p.dataset.pieceId || '') + '>' + ((pai && (pai.dataset.targetId || pai.dataset.columnId)) || 'banco'));
+  });
+  const sel = container.querySelector('.quiz-option.selected');
+  if(sel) partes.push('q:' + (sel.dataset.valor || ''));
+  return partes.join('|');
+}
+
+function celebrarResultado(container, btn){
+  const certos = container.querySelectorAll('.gabarito-certo').length;
+  const errados = container.querySelectorAll('.gabarito-errado').length;
+  const tudoCerto = errados === 0 && certos > 0;
+  const assinatura = assinaturaRespostas(container) + '#' + certos + '/' + errados;
+  const repetido = celebracaoUltima.get(container) === assinatura;
+  celebracaoUltima.set(container, assinatura);
+  // Cliques seguidos sem mudar nenhuma resposta: não repete a celebração.
+  if(repetido && tudoCerto) return;
+
+  // Mensagem curta embaixo do botão (aparece mesmo com movimento reduzido)
+  const anterior = celebracaoMensagem.get(container);
+  if(anterior){ clearTimeout(anterior.timer); anterior.el.remove(); }
+  const lista = tudoCerto ? TEXTOS.celebraAcerto : TEXTOS.celebraQuase;
+  let i = Math.floor(Math.random() * lista.length);
+  if(tudoCerto){ if(i === celebracaoFraseAnterior) i = (i + 1) % lista.length; celebracaoFraseAnterior = i; }
+  const el = document.createElement('div');
+  el.className = 'celebra-msg ' + (tudoCerto ? 'celebra-acerto' : 'celebra-quase');
+  el.setAttribute('role', 'status');
+  el.textContent = lista[i];
+  btn.insertAdjacentElement('afterend', el);
+  const timer = setTimeout(()=>{ el.remove(); }, 4500);
+  celebracaoMensagem.set(container, { el, timer });
+
+  // Estrelas/confete (não roda se o aluno pediu menos movimento; conferência repetida também não)
+  if(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  if(repetido) return;
+  if(tudoCerto) soltarConfete(btn, 30, 210, 150);
+  else if(certos > 0) soltarConfete(btn, 6, 70, 60);
+}
+
+function soltarConfete(origem, quantidade, alcanceX, alcanceY){
+  const r = origem.getBoundingClientRect();
+  const camada = document.createElement('div');
+  camada.className = 'celebra-camada';
+  camada.setAttribute('aria-hidden', 'true');
+  camada.style.left = (r.right + 20) + 'px'; // sai do lado direito do botão (área vazia), pra não cobrir o exercício
+  camada.style.top = (r.top + r.height / 2) + 'px';
+  const cores = ['var(--amber-bold)', 'var(--manteiga)', 'var(--charcoal)'];
+  for(let n = 0; n < quantidade; n++){
+    const p = document.createElement('span');
+    const estrela = n % 2 === 0;
+    p.className = 'celebra-peca ' + (estrela ? 'celebra-estrela' : 'celebra-tira');
+    const tam = (estrela ? 12 : 8) + Math.random() * (quantidade > 10 ? 9 : 3);
+    p.style.setProperty('--tam', tam.toFixed(1) + 'px');
+    p.style.setProperty('--cor', cores[n % cores.length]);
+    p.style.setProperty('--dx', ((Math.random() * 1.1 - 0.1) * alcanceX).toFixed(0) + 'px');
+    p.style.setProperty('--dy', (-(0.35 + Math.random() * 0.65) * alcanceY).toFixed(0) + 'px');
+    p.style.setProperty('--rot', ((Math.random() * 2 - 1) * 400).toFixed(0) + 'deg');
+    p.style.setProperty('--dur', (1000 + Math.random() * 350).toFixed(0) + 'ms');
+    p.style.setProperty('--atraso', (Math.random() * 120).toFixed(0) + 'ms');
+    camada.appendChild(p);
+  }
+  document.body.appendChild(camada);
+  setTimeout(()=>{ camada.remove(); }, 1700);
 }
 
 /* ---- Baralho de flashcards: cards consecutivos (sem nenhum outro tipo de bloco no meio)
