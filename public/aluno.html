@@ -539,7 +539,7 @@ const TEXTOS = {
   fechamentoKicker: '👋 Before you go',
     fechamentoPergunta: 'How was this session? What insights did you get?',
   alunoDesde: (data) => `Since ${data}`,
-  boasVindas: (nome) => `👋 Welcome, ${nome}! This is your personal learning space.`,
+  boasVindas: (nome) => `👋 Welcome, ${nome.trim().split(/\s+/)[0]}! This is your personal learning space.`,
   lembretePendentes: (qtd) => qtd === 1 ? '⏳ You have 1 unfinished session.' : `⏳ You have ${qtd} unfinished sessions.`,
   lembreteLink: 'See your sessions',
 };
