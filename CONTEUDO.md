@@ -180,6 +180,32 @@ alvos sem marcação simplesmente não entram na conferência.
 comparar nesse tipo, então esse recurso não tem efeito nenhum ali, e não deve ser usado com
 esse tipo de bloco.
 
+## Botão de áudio (falar frase em inglês)
+
+Um botãozinho 🔊 que lê uma frase em inglês em voz alta, usando a síntese de voz do próprio
+navegador do aluno (Web Speech API / `speechSynthesis`) — nada é gravado nem hospedado, e por
+isso não engorda a sessão no banco. Pensado pro aluno que ainda está aprendendo a ler.
+
+```html
+<p>Look at the picture and read the sentence. <button class="falar-btn" data-falar="There are two elephants.">🔊</button></p>
+```
+
+- Cole o `<button class="falar-btn" data-falar="...">🔊</button>` em qualquer lugar do texto —
+  dentro de um parágrafo, do `.qtext`, de um `.dnd-label`, ou de uma `.quiz-option`. O
+  `aluno.html` detecta sozinho todo `.falar-btn` da sessão e liga o clique; não precisa (e não
+  deve) escrever nenhum JS junto.
+- `data-falar` é só o texto puro da frase em inglês (sem tags HTML dentro) — é exatamente esse
+  texto que é lido em voz alta.
+- A voz usada é inglês britânico (en-GB), por causa das provas Cambridge; se o aparelho do aluno
+  não tiver nenhuma voz britânica instalada, cai numa voz em inglês genérica. Velocidade um
+  pouco mais lenta que o normal.
+- Clicar num botão enquanto outro áudio está tocando para o anterior e começa o novo na hora.
+- Dentro de uma `.quiz-option`, clicar no 🔊 não seleciona a opção; perto de uma peça de
+  arrastar (`.dnd-piece`), não inicia o arraste. Não precisa se preocupar com isso ao colar o
+  botão — o motor já isola o clique.
+- Se o navegador do aluno não suportar a API (raro, mas existe), o botão some sozinho, sem
+  nenhuma mensagem de erro.
+
 ## Flashcard
 
 Casca visual sobre o `.reveal-btn`/`.reveal-content` já existente. **Cole sempre de 3 a 7
@@ -292,9 +318,10 @@ precisa (ou deve) colar — é automático, igual a pergunta de reflexão do fla
   `id="dnd-..."`, `.dnd-bank`, `.dnd-piece` + `data-piece-id`, `.dnd-target` + `data-target-id`,
   `.dnd-column` + `data-column-id` (sorting), `.dnd-label`, `.dnd-row`, `.quiz-exercise` com
   `id="quiz-..."`, `.quiz-option` + `data-valor`, `.flashcard` (pra detecção do baralho),
-  `.reveal-btn`/`.reveal-content` com `data-target`/`id` combinando. `data-correta` (em
-  `.dnd-target` e `.quiz-option`) e `data-coluna-certa` (em `.dnd-piece`, sorting) também são
-  estruturais, mas **opcionais** — só ligam o gabarito automático quando presentes.
+  `.reveal-btn`/`.reveal-content` com `data-target`/`id` combinando, `.falar-btn` + `data-falar`
+  (botão de áudio). `data-correta` (em `.dnd-target` e `.quiz-option`) e `data-coluna-certa` (em
+  `.dnd-piece`, sorting) também são estruturais, mas **opcionais** — só ligam o gabarito
+  automático quando presentes.
 - **Cosmético** (só CSS de layout, o JS nunca lê essas classes): `formato-fill`,
   `formato-unjumble`, `formato-matchup`, `formato-sorting`, `.reading-passage`, `.embed-video`,
   `.link-card` + `.link-card-label`/`.link-card-title`/`.link-card-url`. Pode remover sem quebrar

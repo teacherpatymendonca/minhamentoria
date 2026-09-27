@@ -282,6 +282,19 @@ try{
   .quiz-option.selected{border-color:var(--charcoal); background:var(--amber-1); font-weight:700;}
   .quiz-option.selected::before{border-color:var(--charcoal); background:var(--charcoal); box-shadow:inset 0 0 0 3px var(--amber-1);}
 
+  /* ---- Botão de áudio: lê em voz alta o texto de data-falar (voz do navegador, nada gravado).
+     Pode ficar em qualquer lugar (parágrafo, .qtext, .dnd-label, .quiz-option...). Redondo, 40px
+     + área de toque de 44px. Se o navegador não tem síntese de voz, o JS esconde (hidden). ---- */
+  .falar-btn{position:relative; flex:0 0 auto; display:inline-flex; align-items:center; justify-content:center; width:40px; height:40px; padding:0; margin:0 6px; vertical-align:middle; border-radius:50%; border:2px solid var(--amber-bold); background:var(--superficie); color:var(--ink-amber); font-size:18px; line-height:1; cursor:pointer; touch-action:manipulation; -webkit-tap-highlight-color:transparent; user-select:none; -webkit-user-select:none; transition:background .15s ease, color .15s ease, transform .08s ease;}
+  .falar-btn[hidden]{display:none;}
+  .falar-btn::after{content:""; position:absolute; inset:-2px;}
+  .falar-btn:hover{background:var(--amber-1);}
+  .falar-btn:focus-visible{outline:3px solid var(--amber-bold); outline-offset:2px;}
+  .falar-btn:active{transform:scale(.92);}
+  .falar-btn.falando{background:var(--amber-bold); color:var(--sobre-destaque);}
+  .dnd-piece .falar-btn, .quiz-option .falar-btn{margin:-4px 0 -4px 4px;}
+  @media (prefers-reduced-motion: reduce){ .falar-btn{transition:none;} }
+
   /* ---- Gabarito automático: botão "Check answers" (mesmo visual do .reveal-btn, classe
      separada pra não entrar no seletor que liga o flip do flashcard) + marcação certo/errado
      + link pequeno "see correct answer" nos itens errados. ---- */
@@ -422,6 +435,14 @@ try{
   /* ---- Emojis dos títulos maiores (o JS envolve cada emoji num <span class="emoji-grande">) ---- */
   [data-tema="infantil"] .emoji-grande{ display:inline-block; font-size:1.45em; line-height:1; vertical-align:-0.1em; margin-right:0.12em; }
 
+  /* ---- Nos exercícios o emoji é a informação principal (aluno ainda não lê bem), então fica
+     ainda maior que nos títulos. A peça/opção cresce junto porque .dnd-bank, .dnd-target e
+     .dnd-column já são flex — não precisa de nada especial pra não desalinhar. ---- */
+  [data-tema="infantil"] .dnd-piece .emoji-grande,
+  [data-tema="infantil"] .quiz-option .emoji-grande,
+  [data-tema="infantil"] .dnd-label .emoji-grande,
+  [data-tema="infantil"] .dnd-column-label .emoji-grande{ font-size:2em; margin-right:0.15em; }
+
   /* ---- Textos mais leves: rótulos pequenos deixam a caixa alta e ficam um pouco maiores ---- */
   [data-tema="infantil"] .kicker{ font-size:16px; letter-spacing:0.01em; text-transform:none; }
   [data-tema="infantil"] .example-block .lbl,
@@ -458,6 +479,10 @@ try{
   [data-tema="infantil"] .deck-nav-btn:disabled{ box-shadow:none; }
   [data-tema="infantil"] .deck-nav-btn.restart{ box-shadow:0 4px 0 var(--botao-sombra); }
   [data-tema="infantil"] .deck-nav-btn.restart:active{ box-shadow:0 0 0 var(--botao-sombra); }
+  [data-tema="infantil"] .falar-btn{ width:52px; height:52px; font-size:25px; border-width:3px; box-shadow:0 4px 0 var(--amber-bold); transition:transform .08s ease, box-shadow .08s ease, background .15s ease, color .15s ease; }
+  [data-tema="infantil"] .falar-btn:active{ transform:translateY(4px); box-shadow:0 0 0 var(--amber-bold); }
+  [data-tema="infantil"] .falar-btn.falando{ background:var(--manteiga); color:var(--charcoal); }
+  [data-tema="infantil"] .dnd-piece .falar-btn, [data-tema="infantil"] .quiz-option .falar-btn{ margin:-6px 0 -10px 4px; }
   [data-tema="infantil"] .tema-toggle{ width:46px; height:46px; box-shadow:0 4px 0 var(--line); transition:transform .08s ease, box-shadow .08s ease; }
   [data-tema="infantil"] .tema-toggle svg{ width:22px; height:22px; }
   [data-tema="infantil"] .visual-toggle{ top:14px; left:70px; min-height:46px; padding:0 22px; border-radius:999px; border:2px solid var(--line); font-size:15px; font-weight:800; box-shadow:0 4px 0 var(--line); transition:transform .08s ease, box-shadow .08s ease; }
@@ -486,7 +511,7 @@ try{
   @media (prefers-reduced-motion: reduce){ [data-tema="infantil"] .celebra-msg{ animation:none; } .celebra-camada{ display:none; } }
   @media (prefers-reduced-motion: reduce){
     [data-tema="infantil"] .finalizar-btn, [data-tema="infantil"] .reveal-btn, [data-tema="infantil"] .gabarito-btn,
-    [data-tema="infantil"] .acervo-toggle, [data-tema="infantil"] .deck-nav-btn, [data-tema="infantil"] .tema-toggle{ transition:none; }
+    [data-tema="infantil"] .acervo-toggle, [data-tema="infantil"] .deck-nav-btn, [data-tema="infantil"] .tema-toggle, [data-tema="infantil"] .falar-btn{ transition:none; }
   }
 </style>
 </head>
@@ -560,6 +585,8 @@ Object.assign(TEXTOS, {
   // Frases da celebração ao conferir respostas (uma é sorteada, sem repetir a anterior).
   celebraAcerto: ['🎉 Great job!', '🌟 You nailed it!', '🚀 Awesome work!', '🏆 Fantastic!'],
   celebraQuase: ['Almost there! Try again.', 'So close! Have another go.'],
+  // Botão de áudio (.falar-btn): rótulo pra leitores de tela.
+  falarRotulo: 'Listen',
 });
 function aplicarTextosDoModo(){ Object.assign(TEXTOS, ehInfantil() ? TEXTOS_DIVERTIDO : TEXTOS_CLASSICO); }
 aplicarTextosDoModo();
@@ -711,6 +738,7 @@ function render(d){
   });
   initDragDrop(d);
   initQuiz(d);
+  initFalar();
   initGabarito();
   initFlashcards(d);
   adicionarPerguntaFechamento(d);
@@ -738,12 +766,12 @@ function limparCelebracoes(){
 function emojisGrandes(){
   if(!ehInfantil()) return;
   const re = new RegExp('(\\p{Extended_Pictographic}(?:\\uFE0F|\\u200D\\p{Extended_Pictographic}|\\p{Emoji_Modifier})*)', 'gu');
-  document.querySelectorAll('header h1, #conteudo-sessao h2, #conteudo-sessao h3, .kicker, .boas-vindas-card').forEach(el=>{
+  document.querySelectorAll('header h1, #conteudo-sessao h2, #conteudo-sessao h3, .kicker, .boas-vindas-card, .dnd-piece, .quiz-option, .dnd-label, .dnd-column-label').forEach(el=>{
     const walker = document.createTreeWalker(el, NodeFilter.SHOW_TEXT);
     const nos = [];
     while(walker.nextNode()) nos.push(walker.currentNode);
     nos.forEach(no=>{
-      if(no.parentElement && no.parentElement.closest('.emoji-grande')) return;
+      if(no.parentElement && no.parentElement.closest('.emoji-grande, .falar-btn')) return;
       const partes = no.nodeValue.split(re);
       if(partes.length < 2) return;
       const frag = document.createDocumentFragment();
@@ -1108,6 +1136,58 @@ function initQuiz(d){
   });
 }
 
+/* ---- Botão de áudio: lê em voz alta o texto de data-falar, usando a síntese de voz do
+   próprio navegador (SpeechSynthesis) — nada gravado, nada hospedado. Quem gera a lição só
+   cola <button class="falar-btn" data-falar="frase em inglês">🔊</button> em qualquer lugar
+   (parágrafo, .qtext, .dnd-label, dentro de .quiz-option ou perto de peça de arrastar); esta
+   função detecta sozinha todo .falar-btn da sessão e liga o clique. ---- */
+
+const FALAR_VELOCIDADE = 0.85;
+let falarVozCache = undefined; // undefined = ainda não resolvido; null = resolvido, nenhuma voz em inglês
+
+// Prioridade: inglês britânico (provas Cambridge) > qualquer inglês > voz padrão do aparelho
+// (nesse último caso a utterance ainda pede lang="en-GB", então o navegador tenta chegar perto).
+function falarEscolherVoz(){
+  if(falarVozCache !== undefined) return falarVozCache;
+  const vozes = speechSynthesis.getVoices();
+  if(!vozes.length) return undefined; // lista carrega assíncrono; tenta de novo no próximo clique
+  falarVozCache = vozes.find(v=>v.lang && v.lang.toLowerCase() === 'en-gb')
+    || vozes.find(v=>v.lang && v.lang.toLowerCase().startsWith('en'))
+    || null;
+  return falarVozCache;
+}
+
+function falarFrase(texto, btn){
+  speechSynthesis.cancel(); // corta qualquer áudio anterior (deste botão ou de outro) antes de começar o novo
+  document.querySelectorAll('.falar-btn.falando').forEach(b=>b.classList.remove('falando'));
+  const utter = new SpeechSynthesisUtterance(texto);
+  utter.lang = 'en-GB';
+  utter.rate = FALAR_VELOCIDADE;
+  const voz = falarEscolherVoz();
+  if(voz) utter.voice = voz;
+  utter.onend = utter.onerror = ()=> btn.classList.remove('falando');
+  btn.classList.add('falando');
+  speechSynthesis.speak(utter);
+}
+
+function initFalar(){
+  const suportado = 'speechSynthesis' in window && typeof SpeechSynthesisUtterance !== 'undefined';
+  document.querySelectorAll('.falar-btn').forEach(btn=>{
+    if(!suportado){ btn.hidden = true; return; }
+    btn.type = 'button';
+    if(!btn.hasAttribute('aria-label')) btn.setAttribute('aria-label', TEXTOS.falarRotulo);
+    // stopPropagation nos dois eventos: clique não pode selecionar a .quiz-option em volta,
+    // e pointerdown não pode iniciar o arraste de uma .dnd-piece em volta (ver iniciarArrasteDnd).
+    btn.addEventListener('pointerdown', e=> e.stopPropagation());
+    btn.addEventListener('click', e=>{
+      e.stopPropagation();
+      e.preventDefault();
+      const texto = btn.dataset.falar;
+      if(texto) falarFrase(texto, btn);
+    });
+  });
+}
+
 /* ---- Gabarito automático: botão "Check answers" nos exercícios dnd/quiz que vierem marcados
    com data-correta (alvo único e quiz) ou data-coluna-certa (peça de sorting). Exercícios
    antigos, sem essa marcação, simplesmente não ganham o botão — não tem gabarito pra conferir.
@@ -1177,6 +1257,13 @@ function inserirLinkGabarito(depoisDe, textoCorreto){
   depoisDe.insertAdjacentElement('afterend', wrap);
 }
 
+// Texto de um elemento sem o rótulo do botão de áudio (senão "🔊" apareceria colado no gabarito).
+function textoSemFalarBtn(el){
+  const clone = el.cloneNode(true);
+  clone.querySelectorAll('.falar-btn').forEach(b=>b.remove());
+  return clone.textContent;
+}
+
 function conferirDndAlvos(container){
   container.querySelectorAll('.dnd-target[data-correta]').forEach(target=>{
     const pecaCerta = target.dataset.correta;
@@ -1186,7 +1273,7 @@ function conferirDndAlvos(container){
     } else {
       target.classList.add('gabarito-errado');
       const peca = container.querySelector('.dnd-piece[data-piece-id="' + pecaCerta + '"]');
-      inserirLinkGabarito(target, peca ? peca.textContent : pecaCerta);
+      inserirLinkGabarito(target, peca ? textoSemFalarBtn(peca) : pecaCerta);
     }
   });
 }
@@ -1200,7 +1287,7 @@ function conferirDndColunas(container){
     } else {
       peca.classList.add('gabarito-errado');
       const coluna = container.querySelector('.dnd-column[data-column-id="' + colunaCerta + '"] .dnd-column-label');
-      inserirLinkGabarito(peca, coluna ? coluna.textContent : colunaCerta);
+      inserirLinkGabarito(peca, coluna ? textoSemFalarBtn(coluna) : colunaCerta);
     }
   });
 }
@@ -1215,9 +1302,9 @@ function conferirQuiz(container){
   }
   if(selecionada){
     selecionada.classList.add('gabarito-errado');
-    inserirLinkGabarito(selecionada, opcaoCerta.textContent);
+    inserirLinkGabarito(selecionada, textoSemFalarBtn(opcaoCerta));
   } else {
-    inserirLinkGabarito(container.lastElementChild, opcaoCerta.textContent);
+    inserirLinkGabarito(container.lastElementChild, textoSemFalarBtn(opcaoCerta));
   }
 }
 
