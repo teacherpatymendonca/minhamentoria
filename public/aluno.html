@@ -574,7 +574,7 @@ function ehInfantil(){ return document.documentElement.getAttribute('data-tema')
 const TEXTOS_CLASSICO = { acervoToggle: TEXTOS.acervoToggle, progresso: TEXTOS.progresso };
 const TEXTOS_DIVERTIDO = {
   acervoToggle: (qtd) => `📚 Your missions (${qtd})`,
-  progresso: (feitas, total) => `${feitas} de ${total} ${total === 1 ? 'missão concluída' : 'missões concluídas'}`,
+  progresso: (feitas, total) => `${feitas} of ${total} ${total === 1 ? 'mission' : 'missions'} completed`,
 };
 Object.assign(TEXTOS, {
   // Botão que troca o visual (o rótulo mostra pra qual modo o aluno vai).
